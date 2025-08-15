@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Motorrad Live-Wetterkarte – Weather Focus (ohne Übersicht, Auto-Locate)</title>
+  <title>Motorrad Live-Wetterkarte – Weather Focus (Auto-Locate, Fix)</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <style>
@@ -53,11 +53,18 @@
       <button class="btn pill" id="modeDayAfter">Übermorgen</button>
     </div>
   </div>
-  <div class="status" id="status">Bestimme deinen Standort …</div>
+  <div class="status" id="status">Karte lädt …</div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
+    // Helper for CSS vars with fallback
+    function cssVar(name, fallback){ 
+      var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+      v = v ? v.trim() : '';
+      return v || fallback;
+    }
+
     const points = [
       { name: "Grosshöchstetten (CH)", lat: 46.906, lon: 7.638 },
       { name: "Interlaken (CH)",       lat: 46.686, lon: 7.863 },
@@ -77,153 +84,147 @@
       { name: "Breze (HR)",            lat: 44.997, lon: 14.987 },
       { name: "Senj (HR)",             lat: 44.989, lon: 14.905 }
     ];
-    const stripCountry = (s) => s.replace(/\s*\([A-Z]{2}\)\s*$/, '');
+    function stripCountry(s){ return s.replace(/\s*\([A-Z]{2}\)\s*$/, ''); }
 
     // Basemap
     const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; OSM & CARTO' });
     const map = L.map('map', { layers: [cartoLight] });
 
-    // Fix initial render
-    window.addEventListener('load', () => setTimeout(() => map.invalidateSize(), 150));
+    window.addEventListener('load', function(){ setTimeout(function(){ map.invalidateSize(); }, 150); });
 
     // Buttons
-    document.getElementById('fit').addEventListener('click', () => fitRoute());
-    document.getElementById('locate').addEventListener('click', () => locateMe(true));
-    document.getElementById('share').addEventListener('click', async () => {
+    document.getElementById('fit').addEventListener('click', function(){ fitRoute(); });
+    document.getElementById('locate').addEventListener('click', function(){ locateMe(true); });
+    document.getElementById('share').addEventListener('click', async function(){
       const url = location.href;
-      if (navigator.share) { try { await navigator.share({ title: document.title, url }); } catch(e){} }
+      if (navigator.share) { try { await navigator.share({ title: document.title, url: url }); } catch(e){} }
       else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } }
     });
 
-    // Mode (affects popup content)
-    const modeBtns = { today: document.getElementById('modeToday'), tomorrow: document.getElementById('modeTomorrow'), dayAfter: document.getElementById('modeDayAfter') };
-    let mode = 'today';
+    // Mode
+    var modeBtns = { today: document.getElementById('modeToday'), tomorrow: document.getElementById('modeTomorrow'), dayAfter: document.getElementById('modeDayAfter') };
+    var mode = 'today';
     function setMode(m){
       mode = m;
-      for (const k in modeBtns) modeBtns[k].classList.toggle('active', (k===m));
+      for (var k in modeBtns) { modeBtns[k].classList.toggle('active', (k===m)); }
     }
-    modeBtns.today.addEventListener('click', () => setMode('today'));
-    modeBtns.tomorrow.addEventListener('click', () => setMode('tomorrow'));
-    modeBtns.dayAfter.addEventListener('click', () => setMode('dayAfter'));
+    modeBtns.today.addEventListener('click', function(){ setMode('today'); });
+    modeBtns.tomorrow.addEventListener('click', function(){ setMode('tomorrow'); });
+    modeBtns.dayAfter.addEventListener('click', function(){ setMode('dayAfter'); });
 
-    // Markers with labels + click for weather
-    const markers = [];
-    points.forEach((p, i) => {
-      const m = L.marker([p.lat, p.lon], { icon: L.divIcon({ className:'chip-marker', html:`<div>${stripCountry(p.name)}</div>`, iconSize:[10,10], iconAnchor:[10,24], popupAnchor:[0,-20] })}).addTo(map);
-      m.on('click', () => { m.bindPopup('<div>Lade Wetter…</div>').openPopup(); loadPopup(p, m); });
+    // Markers + labels
+    var markers = [];
+    points.forEach(function(p){
+      var m = L.marker([p.lat, p.lon], { icon: L.divIcon({ className:'chip-marker', html:'<div>'+stripCountry(p.name)+'</div>', iconSize:[10,10], iconAnchor:[10,24], popupAnchor:[0,-20] })}).addTo(map);
+      m.on('click', function(){ m.bindPopup('<div>Lade Wetter…</div>').openPopup(); loadPopup(p, m); });
       markers.push(m);
     });
 
-    // Dashed fallback line (always on load)
-    const latlngs = points.map(p => [p.lat, p.lon]);
-    const fallbackGroup = L.layerGroup().addTo(map);
-    L.polyline(latlngs, { color: getComputedStyle(document.documentElement).getPropertyValue('--route-outline').trim(), weight: 6, opacity: .9, dashArray: '6 8' }).addTo(fallbackGroup);
-    L.polyline(latlngs, { color: getComputedStyle(document.documentElement).getPropertyValue('--fallback').trim(), weight: 3, opacity: .9, dashArray: '6 8' }).addTo(fallbackGroup);
+    // Fallback route — draw immediately and fit to it so it's always visible
+    var latlngs = points.map(function(p){ return [p.lat, p.lon]; });
+    var fallbackGroup = L.layerGroup().addTo(map);
+    // Use explicit colors (no CSS var dependency) and thicker stroke
+    L.polyline(latlngs, { color: '#ffffff', weight: 8, opacity: .95, dashArray: '8 10' }).addTo(fallbackGroup);
+    L.polyline(latlngs, { color: '#6b7280', weight: 4, opacity: .95, dashArray: '8 10' }).addTo(fallbackGroup);
 
-    // Route group (OSRM single request)
-    const routeGroup = L.layerGroup().addTo(map);
-    let routeBounds = null;
-    let routeCoords = null;
+    // Fit to fallback immediately (before geolocate/OSRM) so you always see a line
+    map.fitBounds(L.latLngBounds(latlngs), { padding: [24,24] });
 
+    // Route group
+    var routeGroup = L.layerGroup().addTo(map);
+    var routeBounds = null;
+    var routeCoords = null;
     function drawCased(coords, color) {
-      const outline = L.polyline(coords, { color: getComputedStyle(document.documentElement).getPropertyValue('--route-outline').trim(), weight: 8, opacity: 0.9 }).addTo(routeGroup);
-      const main = L.polyline(coords, { color, weight: 5, opacity: 1.0 }).addTo(routeGroup);
-      return [outline, main];
+      L.polyline(coords, { color: cssVar('--route-outline','#ffffff'), weight: 9, opacity: 0.95 }).addTo(routeGroup);
+      L.polyline(coords, { color: color, weight: 6, opacity: 1.0 }).addTo(routeGroup);
     }
     function decodePolyline6(str){
-      let index = 0, lat = 0, lon = 0, coords = [];
-      const factor = 1e-6;
+      var index = 0, lat = 0, lon = 0, coords = [];
+      var factor = 1e-6;
       while (index < str.length) {
-        let b, res = 0, sh = 0;
+        var b, res = 0, sh = 0;
         do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
-        const dlat = (res & 1) ? ~(res >> 1) : (res >> 1); lat += dlat;
+        var dlat = (res & 1) ? ~(res >> 1) : (res >> 1); lat += dlat;
         res = 0; sh = 0;
         do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
-        const dlon = (res & 1) ? ~(res >> 1) : (res >> 1); lon += dlon;
+        var dlon = (res & 1) ? ~(res >> 1) : (res >> 1); lon += dlon;
         coords.push([lat * factor, lon * factor]);
       }
       return coords;
     }
     function osrmUrlAll(points) {
-      const coords = points.map(p => `${p.lon},${p.lat}`).join(';');
-      return `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=polyline6&alternatives=false&steps=false&continue_straight=true`;
+      var coords = points.map(function(p){ return p.lon+','+p.lat; }).join(';');
+      return 'https://router.project-osrm.org/route/v1/driving/'+coords+'?overview=full&geometries=polyline6&alternatives=false&steps=false&continue_straight=true';
     }
     async function fetchWithTimeout(url, ms){
-      const ctrl = new AbortController(); const id = setTimeout(()=>ctrl.abort(), ms);
+      const ctrl = new AbortController(); const id = setTimeout(function(){ ctrl.abort(); }, ms);
       try { const res = await fetch(url, { signal: ctrl.signal }); return res; } finally { clearTimeout(id); }
     }
-    (async () => {
-      const status = document.getElementById('status');
+    (async function(){
+      var status = document.getElementById('status');
       try {
-        const res = await fetchWithTimeout(osrmUrlAll(points), 7000);
-        if (!res.ok) throw new Error('OSRM Fehler ' + res.status);
+        const res = await fetchWithTimeout(osrmUrlAll(points), 8000);
+        if (!res.ok) throw new Error('OSRM '+res.status);
         const data = await res.json();
-        if (!data.routes || !data.routes[0]) throw new Error('Keine Route gefunden');
-        routeCoords = decodePolyline6(data.routes[0].geometry).map(([la,lo]) => [la, lo]);
-        drawCased(routeCoords, getComputedStyle(document.documentElement).getPropertyValue('--route').trim());
+        if (!data.routes || !data.routes[0]) throw new Error('Keine Route');
+        routeCoords = decodePolyline6(data.routes[0].geometry).map(function(x){ return [x[0], x[1]]; });
+        drawCased(routeCoords, cssVar('--route','#6b705c'));
         routeBounds = L.latLngBounds(routeCoords);
-        status.textContent = 'Bereit.';
-        setTimeout(()=>{ status.style.display='none'; }, 1500);
+        // Replace fallback once route is in
         map.removeLayer(fallbackGroup);
-      } catch (e) {
-        console.warn('OSRM fehlgeschlagen oder zu langsam', e);
-        status.textContent = 'Zeige Fallback-Linie (keine Straßenroute).';
+        status.textContent = 'Bereit.'; setTimeout(function(){ status.style.display='none'; }, 1200);
+      } catch(e){
+        console.warn('OSRM Problem', e);
+        status.textContent = 'Zeige Fallback (Straßenroute nicht geladen).';
+        setTimeout(function(){ status.style.display='none'; }, 2500);
       }
     })();
 
-    // --- Auto-zoom to current location on load ---
-    let meMarker = null;
+    // Auto-locate with route awareness
+    var meMarker = null;
     function markMe(lat, lon){
       if (meMarker) { map.removeLayer(meMarker); }
-      meMarker = L.circleMarker([lat, lon], {
-        radius: 6, weight: 2, color: getComputedStyle(document.documentElement).getPropertyValue('--me').trim(), fillOpacity: .6
-      }).addTo(map);
+      meMarker = L.circleMarker([lat, lon], { radius: 6, weight: 2, color: cssVar('--me','#2563eb'), fillOpacity: .6 }).addTo(map);
       meMarker.bindPopup('Dein Standort');
     }
     function fitRoute(){
-      const b = routeBounds || L.latLngBounds(latlngs);
+      var b = routeBounds || L.latLngBounds(latlngs);
       map.fitBounds(b, { padding: [24,24] });
-      const s = document.getElementById('status'); s.textContent = 'Route zentriert.'; s.style.display='block'; setTimeout(()=>{ s.style.display='none'; }, 1000);
+      var s = document.getElementById('status'); s.textContent = 'Route zentriert.'; s.style.display='block'; setTimeout(function(){ s.style.display='none'; }, 1000);
     }
-
-    // Approx nearest distance between a point and sampled route coords
     function toRad(x){ return x*Math.PI/180; }
     function haversine(lat1, lon1, lat2, lon2){
-      const R=6371000;
-      const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
-      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+      var R=6371000; var dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
+      var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)*Math.sin(dLon/2);
       return 2*R*Math.asin(Math.sqrt(a));
     }
     function nearestDistanceMeters(lat, lon, coords){
-      if (!coords || coords.length===0) return Infinity;
-      let best = Infinity;
-      for (let i=0;i<coords.length;i+=20){ // sample every ~20 points
-        const c = coords[i];
-        const d = haversine(lat, lon, c[0], c[1]);
+      if (!coords || !coords.length) return Infinity;
+      var best = Infinity;
+      for (var i=0;i<coords.length;i+=20){
+        var c = coords[i];
+        var d = haversine(lat, lon, c[0], c[1]);
         if (d<best) best=d;
       }
       return best;
     }
-
-    function locateMe(userAction=false){
-      const status = document.getElementById('status');
-      status.style.display='block';
-      status.textContent = 'Bestimme deinen Standort …';
-      if (!navigator.geolocation) { status.textContent = 'Geolocation nicht verfügbar.'; fitRoute(); return; }
-      navigator.geolocation.getCurrentPosition(pos => {
-        const { latitude, longitude } = pos.coords;
+    function locateMe(userAction){
+      var status = document.getElementById('status');
+      status.style.display='block'; status.textContent = 'Bestimme deinen Standort …';
+      if (!navigator.geolocation) { status.textContent = 'Geolocation nicht verfügbar.'; return; }
+      navigator.geolocation.getCurrentPosition(function(pos){
+        var latitude = pos.coords.latitude, longitude = pos.coords.longitude;
         markMe(latitude, longitude);
-
         if (routeCoords && routeCoords.length){
-          const dist = nearestDistanceMeters(latitude, longitude, routeCoords);
-          if (dist < 30000){ // nahe Route
+          var dist = nearestDistanceMeters(latitude, longitude, routeCoords);
+          if (dist < 30000){
             map.setView([latitude, longitude], 11);
             status.textContent = 'Zentriert auf dich (nahe Route).';
           } else if (routeBounds){
-            const combo = routeBounds.pad(0);
+            var combo = routeBounds.pad(0);
             combo.extend([latitude, longitude]);
             map.fitBounds(combo, { padding: [28,28] });
-            status.textContent = 'Route + Standort im Blick. Tipp: „Route zentrieren“.';
+            status.textContent = 'Route + Standort im Blick.';
           } else {
             map.setView([latitude, longitude], 11);
             status.textContent = 'Zentriert auf dich.';
@@ -232,20 +233,19 @@
           map.setView([latitude, longitude], 11);
           status.textContent = 'Zentriert auf dich.';
         }
-        setTimeout(()=>{ status.style.display='none'; }, 1600);
-      }, err => {
+        setTimeout(function(){ status.style.display='none'; }, 1600);
+      }, function(err){
         console.warn('Geo-Error', err);
-        status.textContent = 'Standort nicht erlaubt – zeige Route.';
-        fitRoute();
-        setTimeout(()=>{ status.style.display='none'; }, 1600);
+        status.textContent = 'Standort nicht erlaubt. Tipp: „Route zentrieren“.';
+        setTimeout(function(){ status.style.display='none'; }, 1800);
       }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 60000 });
     }
 
-    // Try auto-locate on startup; fallback to route if denied/timeout
+    // Start: immediately fit to route (done above), then try auto-locate
     locateMe(false);
 
-    // Weather popups (selected day + small 'now' line)
-    const codeMap = {
+    // Weather popups (no optional chaining for older Safari)
+    var codeMap = {
       0: "Klar ☀️", 1: "Überwiegend klar 🌤️", 2: "Wechselhaft ⛅", 3: "Bedeckt ☁️",
       45: "Nebel 🌫️", 48: "Reif/Nebel 🌫️",
       51: "Nieselregen 🌦️", 53: "Nieselregen 🌦️", 55: "Nieselregen 🌦️",
@@ -258,31 +258,35 @@
       85: "Schneeschauer 🌨️", 86: "Starke Schneeschauer 🌨️",
       95: "Gewitter ⛈️", 96: "Gewitter mit Hagel ⛈️", 97: "Gewitter mit Hagel ⛈️"
     };
-    function fmt(n, unit){ return (n==null || Number.isNaN(n)) ? '-' : `${Math.round(n)}${unit||''}`; }
-    function windyLink(lat, lon){ const z=8; return `https://www.windy.com/${lat.toFixed(3)}/${lon.toFixed(3)}?${lat.toFixed(3)},${lon.toFixed(3)},${z}`; }
+    function fmt(n, unit){ return (n==null || isNaN(n)) ? '-' : (Math.round(n)+(unit||'')); }
+    function windyLink(lat, lon){ var z=8; return 'https://www.windy.com/'+lat.toFixed(3)+'/'+lon.toFixed(3)+'?'+lat.toFixed(3)+','+lon.toFixed(3)+','+z; }
 
     async function loadPopup(p, marker) {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}` +
-                  `&current=temperature_2m,precipitation,wind_speed_10m,weather_code` +
-                  `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code` +
-                  `&timezone=auto`;
+      var url = 'https://api.open-meteo.com/v1/forecast?latitude='+p.lat+'&longitude='+p.lon
+              + '&current=temperature_2m,precipitation,wind_speed_10m,weather_code'
+              + '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code'
+              + '&timezone=auto';
       try {
         const res = await fetch(url); const data = await res.json();
-        const cur = data.current || {}; const d = data.daily || {};
-        const idx = (mode==='today') ? 0 : (mode==='tomorrow' ? 1 : 2);
-        const dayLabel = (idx===0?'Heute':(idx===1?'Morgen':'Übermorgen'));
-        const wdesc = codeMap[d.weather_code?.[idx]] || "–";
+        var cur = data.current || {}; var d = data.daily || {};
+        var idx = (mode==='today') ? 0 : (mode==='tomorrow' ? 1 : 2);
+        var dayLabel = (idx===0?'Heute':(idx===1?'Morgen':'Übermorgen'));
+        var wxCodeDay = (d.weather_code && d.weather_code[idx] != null) ? d.weather_code[idx] : null;
+        var wxDescDay = codeMap[wxCodeDay] || '–';
 
-        const html = `
-          <div>
-            <strong>${p.name}</strong><br/>
-            <div style="margin:4px 0 6px;"><em>${dayLabel}</em>: <strong>Max ${fmt(d.temperature_2m_max?.[idx],"°C")}</strong> · Min ${fmt(d.temperature_2m_min?.[idx],"°C")} · Regenwkt. ${d.precipitation_probability_max?.[idx] ?? "-"}% · ${wdesc}</div>
-            <div style="font-size:12px;color:var(--muted);">Jetzt: ${fmt(cur.temperature_2m,"°C")} · Wind ${fmt(cur.wind_speed_10m, " km/h")} · ${codeMap[cur.weather_code] || "–"}</div>
-            <a href="${windyLink(p.lat, p.lon)}" target="_blank" rel="noopener">Details auf Windy öffnen</a>
-          </div>`;
+        var maxT = d.temperature_2m_max && d.temperature_2m_max[idx];
+        var minT = d.temperature_2m_min && d.temperature_2m_min[idx];
+        var pop  = d.precipitation_probability_max && d.precipitation_probability_max[idx];
+
+        var html = '<div>' +
+            '<strong>'+p.name+'</strong><br/>' +
+            '<div style="margin:4px 0 6px;"><em>'+dayLabel+'</em>: <strong>Max '+fmt(maxT,'°C')+'</strong> · Min '+fmt(minT,'°C')+' · Regenwkt. '+(pop==null?'-':pop+'%')+' · '+wxDescDay+'</div>' +
+            '<div style="font-size:12px;color:var(--muted);">Jetzt: '+fmt(cur.temperature_2m,'°C')+' · Wind '+fmt(cur.wind_speed_10m,' km/h')+' · '+(codeMap[cur.weather_code] || '–')+'</div>' +
+            '<a href="'+windyLink(p.lat, p.lon)+'" target="_blank" rel="noopener">Details auf Windy öffnen</a>' +
+          '</div>';
         marker.bindPopup(html).openPopup();
       } catch(e) {
-        marker.bindPopup(`<div><strong>${p.name}</strong><br/><span style="color:var(--muted);">Wetter gerade nicht erreichbar.</span></div>`).openPopup();
+        marker.bindPopup('<div><strong>'+p.name+'</strong><br/><span style="color:var(--muted);">Wetter gerade nicht erreichbar.</span></div>').openPopup();
       }
     }
   </script>
