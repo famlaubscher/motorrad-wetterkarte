@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Motorrad Live-Wetterkarte – Weather Focus (Auto-Locate: Mein Standort)</title>
+  <title>Moto Wetter – Live-Wetterkarte (PWA + Auto-Refresh)</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-  <!-- (Optional) App icons & PWA – falls im Repo vorhanden -->
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
@@ -21,6 +20,7 @@
       --chip-bg: #111827; --chip-br: rgba(255,255,255,.9); --chip-shadow: 0 1px 0 rgba(0,0,0,.25);
       --route: #6b705c; --route-outline: #ffffff; --fallback: #9ca3af;
       --me: #2563eb; --btn-bg: rgba(255,255,255,.96); --btn-br: #e5e7eb; --btn-tx: #111827;
+      --accent: #111827;
     }
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
     #map { width: 100%; height: 100vh; }
@@ -43,7 +43,16 @@
       border: 2px solid var(--chip-br); box-shadow: 0 6px 16px rgba(0,0,0,.18);
       white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px; text-shadow: var(--chip-shadow);
     }
+    .fab {
+      position: absolute; right: 14px; bottom: 16px; z-index: 1100;
+      width: 64px; height: 64px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: var(--accent); color: #fff; font: 900 14px/1 system-ui, -apple-system, Segoe UI;
+      border: 2px solid rgba(255,255,255,.85); box-shadow: 0 12px 24px rgba(0,0,0,.18);
+    }
     .leaflet-control { border-radius: 8px; overflow: hidden; }
+    .offline { color: #b91c1c; font-weight: 700; }
+    .online { color: #065f46; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -58,11 +67,22 @@
       <button class="btn pill" id="modeDayAfter">Übermorgen</button>
     </div>
   </div>
+  <button class="fab" id="fabNow" title="Jetzt-Wetter">JETZT</button>
   <div class="status" id="status">Karte lädt …</div>
-
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async function() {
+        try { await navigator.serviceWorker.register('./sw.js'); }
+        catch(e){ console.warn('SW reg fail', e); }
+      });
+    }
+    window.addEventListener('online', () => setStatus('Online', 'online'));
+    window.addEventListener('offline', () => setStatus('Offline – zeige Cache', 'offline'));
+    function setStatus(msg, cls){
+      var s = document.getElementById('status'); s.textContent = msg; s.className = 'status '+(cls||''); s.style.display='block'; setTimeout(function(){ s.style.display='none'; }, 1800);
+    }
     function cssVar(name, fallback){ 
       var v = getComputedStyle(document.documentElement).getPropertyValue(name);
       v = v ? v.trim() : '';
@@ -72,7 +92,7 @@
       { name: "Grosshöchstetten (CH)", lat: 46.906, lon: 7.638 },
       { name: "Interlaken (CH)",       lat: 46.686, lon: 7.863 },
       { name: "Andermatt (CH)",        lat: 46.637, lon: 8.593 },
-      { name: "Bonaduz (CH)",             lat: 46.811, lon: 9.399 },
+      { name: "Chur (CH)",             lat: 46.850, lon: 9.532 },
       { name: "St. Moritz (CH)",       lat: 46.490, lon: 9.835 },
       { name: "Bormio (IT)",           lat: 46.468, lon: 10.366 },
       { name: "Bozen (IT)",            lat: 46.498, lon: 11.354 },
@@ -89,41 +109,29 @@
     ];
     function stripCountry(s){ return s.replace(/\s*\([A-Z]{2}\)\s*$/, ''); }
 
-    // Basemap
     const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; OSM & CARTO' });
     const map = L.map('map', { layers: [cartoLight] });
     window.addEventListener('load', function(){ setTimeout(function(){ map.invalidateSize(); }, 150); });
 
-    // Buttons
     document.getElementById('fit').addEventListener('click', function(){ fitRoute(); });
     document.getElementById('locate').addEventListener('click', function(){ locateMe(true); });
+    document.getElementById('fabNow').addEventListener('click', function(){ locateMe(true, true); });
     document.getElementById('share').addEventListener('click', async function(){
       const url = location.href;
       if (navigator.share) { try { await navigator.share({ title: document.title, url: url }); } catch(e){} }
       else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } }
     });
 
-    // Mode (persisted)
     var modeBtns = { today: document.getElementById('modeToday'), tomorrow: document.getElementById('modeTomorrow'), dayAfter: document.getElementById('modeDayAfter') };
     var mode = 'today';
-    function applyModeUI() {
-      for (var k in modeBtns) modeBtns[k].classList.toggle('active', (k===mode));
-    }
-    function setMode(m, persist){
-      mode = m; applyModeUI();
-      if (persist) { try { localStorage.setItem('mw-mode', m); } catch(e){} }
-    }
-    function smartDefaultMode(){
-      try { var saved = localStorage.getItem('mw-mode'); if (saved) return saved; } catch(e){}
-      var h = new Date().getHours();
-      return (h >= 16) ? 'tomorrow' : 'today';
-    }
+    function applyModeUI() { for (var k in modeBtns) modeBtns[k].classList.toggle('active', (k===mode)); }
+    function setMode(m, persist){ mode=m; applyModeUI(); if (persist) { try { localStorage.setItem('mw-mode', m); } catch(e){} } }
+    function smartDefaultMode(){ try { var saved = localStorage.getItem('mw-mode'); if (saved) return saved; } catch(e){}; return (new Date().getHours() >= 16) ? 'tomorrow' : 'today'; }
     setMode(smartDefaultMode(), false);
     modeBtns.today.addEventListener('click', function(){ setMode('today', true); });
     modeBtns.tomorrow.addEventListener('click', function(){ setMode('tomorrow', true); });
     modeBtns.dayAfter.addEventListener('click', function(){ setMode('dayAfter', true); });
 
-    // Markers + labels
     var markers = [];
     points.forEach(function(p){
       var m = L.marker([p.lat, p.lon], { icon: L.divIcon({ className:'chip-marker', html:'<div>'+stripCountry(p.name)+'</div>', iconSize:[10,10], iconAnchor:[10,24], popupAnchor:[0,-20] })}).addTo(map);
@@ -131,14 +139,12 @@
       markers.push({ marker: m, data: p });
     });
 
-    // Fallback route — draw immediately
     var latlngs = points.map(function(p){ return [p.lat, p.lon]; });
     var fallbackGroup = L.layerGroup().addTo(map);
     L.polyline(latlngs, { color: '#ffffff', weight: 8, opacity: .95, dashArray: '8 10' }).addTo(fallbackGroup);
     L.polyline(latlngs, { color: '#6b7280', weight: 4, opacity: .95, dashArray: '8 10' }).addTo(fallbackGroup);
     map.fitBounds(L.latLngBounds(latlngs), { padding: [24,24] });
 
-    // Route group
     var routeGroup = L.layerGroup().addTo(map);
     var routeBounds = null;
     var routeCoords = null;
@@ -187,32 +193,16 @@
       }
     })();
 
-    // Utils
     function fitRoute(){
       var b = routeBounds || L.latLngBounds(latlngs);
       map.fitBounds(b, { padding: [24,24] });
-      var s = document.getElementById('status'); s.textContent = 'Route zentriert.'; s.style.display='block'; setTimeout(function(){ s.style.display='none'; }, 1000);
+      setStatus('Route zentriert.');
     }
     function windyLink(lat, lon){ var z=8; return 'https://www.windy.com/'+lat.toFixed(3)+'/'+lon.toFixed(3)+'?'+lat.toFixed(3)+','+lon.toFixed(3)+','+z; }
-    var codeMap = {
-      0: "Klar ☀️", 1: "Überwiegend klar 🌤️", 2: "Wechselhaft ⛅", 3: "Bedeckt ☁️",
-      45: "Nebel 🌫️", 48: "Reif/Nebel 🌫️",
-      51: "Nieselregen 🌦️", 53: "Nieselregen 🌦️", 55: "Nieselregen 🌦️",
-      56: "Gefrierender Niesel 🌧️❄️", 57: "Gefrierender Niesel 🌧️❄️",
-      61: "Regen 🌧️", 63: "Regen 🌧️", 65: "Starker Regen 🌧️",
-      66: "Gefrierender Regen 🌧️❄️", 67: "Gefrierender Regen 🌧️❄️",
-      71: "Schnee 🌨️", 73: "Schnee 🌨️", 75: "Starker Schnee 🌨️",
-      77: "Schneegriesel 🌨️",
-      80: "Schauer 🌦️", 81: "Schauer 🌦️", 82: "Starke Schauer 🌧️",
-      85: "Schneeschauer 🌨️", 86: "Starke Schneeschauer 🌨️",
-      95: "Gewitter ⛈️", 96: "Gewitter mit Hagel ⛈️", 97: "Gewitter mit Hagel ⛈️"
-    };
+    var codeMap = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",85:"Schneeschauer 🌨️",86:"Starke Schneeschauer 🌨️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"};
     function fmt(n, unit){ return (n==null || isNaN(n)) ? '-' : (Math.round(n)+(unit||'')); }
 
-    // Weather loaders
-    async function loadPopupForPoint(p, marker) {
-      await loadPopupGeneric(p.name, p.lat, p.lon, marker);
-    }
+    async function loadPopupForPoint(p, marker) { await loadPopupGeneric(p.name, p.lat, p.lon, marker); }
     async function loadPopupGeneric(label, lat, lon, marker) {
       var url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
               + '&current=temperature_2m,precipitation,wind_speed_10m,weather_code'
@@ -240,9 +230,10 @@
       }
     }
 
-    // Geolocate -> show my weather
     var meMarker = null;
-    function markMe(lat, lon){
+    var lastMe = null;
+    function markMe(lat, lon, recenter){
+      lastMe = {lat, lon};
       if (meMarker) { map.removeLayer(meMarker); }
       meMarker = L.circleMarker([lat, lon], { radius: 6, weight: 2, color: cssVar('--me','#2563eb'), fillOpacity: .6 }).addTo(map);
       meMarker.bindPopup('Lade Wetter…').openPopup();
@@ -251,28 +242,37 @@
         loadPopupGeneric('Dein Standort', lat, lon, meMarker);
       });
       loadPopupGeneric('Dein Standort', lat, lon, meMarker);
+      if (recenter) {
+        if (routeBounds){
+          var inside = routeBounds.contains([lat, lon]);
+          if (inside){ map.setView([lat, lon], 11); }
+          else { var combo = routeBounds.pad(0); combo.extend([lat, lon]); map.fitBounds(combo, { padding: [28,28] }); }
+        } else { map.setView([lat, lon], 11); }
+      }
     }
 
-    function locateMe(userAction){
+    function locateMe(userAction, forceRecenter){
       var status = document.getElementById('status');
       status.style.display='block'; status.textContent = 'Bestimme deinen Standort …';
       if (!navigator.geolocation) { status.textContent = 'Geolocation nicht verfügbar.'; return; }
       navigator.geolocation.getCurrentPosition(function(pos){
         var latitude = pos.coords.latitude, longitude = pos.coords.longitude;
-        markMe(latitude, longitude);
-        if (routeBounds){
-          var inside = routeBounds.contains([latitude, longitude]);
-          if (inside){ map.setView([latitude, longitude], 11); }
-          else { var combo = routeBounds.pad(0); combo.extend([latitude, longitude]); map.fitBounds(combo, { padding: [28,28] }); }
-        } else { map.setView([latitude, longitude], 11); }
+        markMe(latitude, longitude, true);
         status.textContent = 'Zentriert.'; setTimeout(function(){ status.style.display='none'; }, 1600);
       }, function(err){
         console.warn('Geo-Error', err);
         status.textContent = 'Standort nicht erlaubt – zeige Route.';
         fitRoute();
         setTimeout(function(){ status.style.display='none'; }, 1800);
-      }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 60000 });
+      }, { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 });
     }
+
+    setInterval(function(){
+      if (document.visibilityState === 'visible' && lastMe && meMarker) {
+        loadPopupGeneric('Dein Standort', lastMe.lat, lastMe.lon, meMarker);
+        setStatus('Wetter aktualisiert');
+      }
+    }, 20 * 60 * 1000);
 
     (function start(){
       fitRoute();
