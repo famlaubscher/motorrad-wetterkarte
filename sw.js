@@ -1,5 +1,5 @@
-// PWA Service Worker (GPX aware)
-const VERSION = 'mw-v1.5.1';
+// PWA Service Worker (Snapshot Log)
+const VERSION = 'mw-v1.7.0';
 const APP_SHELL = ['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
@@ -11,6 +11,7 @@ self.addEventListener('activate', (e) => {
 });
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
+  // Weather: network-first
   if (url.hostname.includes('open-meteo.com')) {
     event.respondWith(fetch(event.request).then(res => {
       caches.open(VERSION).then(cache => cache.put(event.request, res.clone()));
@@ -18,6 +19,15 @@ self.addEventListener('fetch', (event) => {
     }).catch(()=>caches.match(event.request)));
     return;
   }
+  // History JSON: network-first
+  if (url.pathname.endsWith('/history/history.json')) {
+    event.respondWith(fetch(event.request).then(res => {
+      caches.open(VERSION).then(cache => cache.put(event.request, res.clone()));
+      return res;
+    }).catch(()=>caches.match(event.request)));
+    return;
+  }
+  // Tiles/libs/GPX/static: cache-first
   if (url.hostname.includes('basemaps.cartocdn.com') || url.hostname.includes('unpkg.com') ||
       url.pathname.endsWith('.css') || url.pathname.endsWith('.js') || url.pathname.endsWith('.png') ||
       url.pathname.endsWith('.webmanifest') || url.pathname.endsWith('.json') || url.pathname.endsWith('.gpx')) {

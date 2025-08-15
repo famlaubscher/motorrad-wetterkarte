@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Moto Wetter – Live-Wetterkarte (GPX + PWA)</title>
+  <title>Moto Wetter – Snapshot Log (GPX + PWA)</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <!-- Icons & PWA -->
@@ -20,33 +20,27 @@
       --bg: #f9fafb; --text: #111827; --muted: #6b7280;
       --chip-bg: #111827; --chip-br: rgba(255,255,255,.9); --chip-shadow: 0 1px 0 rgba(0,0,0,.25);
       --route: #6b705c; --route-outline: #ffffff; --fallback: #9ca3af;
-      --me: #2563eb; --btn-bg: rgba(255,255,255,.96); --btn-br: #e5e7eb; --btn-tx: #111827;
+      --me: #2563eb; --btn-bg: rgba(17,24,39,.96); --btn-br: rgba(255,255,255,.9); --btn-tx: #fff;
       --accent: #111827;
+      --snap: #0ea5e9;         /* local snapshots */
+      --snap-outline: #ffffff;
+      --hist: #8b5cf6;         /* published history */
     }
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
     #map { width: 100%; height: 100vh; }
 
     .toolbar { position: absolute; top: 12px; left: 12px; display: grid; gap: 8px; z-index: 1000; }
     .btn {
-      appearance: none;
-      border: 2px solid var(--chip-br);
-      background: var(--chip-bg);
-      color: #fff;
-      border-radius: 999px;
-      padding: 6px 10px;
-      font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,.18);
-      min-width: 40px;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
+      appearance: none; border: 2px solid var(--btn-br); background: var(--btn-bg); color: var(--btn-tx);
+      border-radius: 999px; padding: 6px 10px; font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,.18); min-width: 40px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
     }
-    .segbtns { display:flex; gap:6px; }
+    .segbtns { display:flex; gap:6px; flex-wrap: wrap; }
     .btn.pill { border-radius: 999px; padding: 5px 9px; }
     .btn.active { box-shadow: 0 6px 14px rgba(0,0,0,.22); border-color: rgba(255,255,255,1); }
 
     .status { position: absolute; bottom: 12px; left: 12px; z-index: 1000;
-      background: var(--btn-bg); border: 1px solid var(--btn-br); border-radius: 10px; padding: 8px 10px;
+      background: rgba(255,255,255,.96); border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px 10px;
       font: 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: var(--muted); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
 
     .chip-marker { transform: translate(-50%, -34px); }
@@ -70,21 +64,17 @@
       touch-action: manipulation;
     }
     @supports (bottom: constant(safe-area-inset-bottom)) {
-      .fab {
-        right: calc(constant(safe-area-inset-right) + 14px);
-        bottom: calc(constant(safe-area-inset-bottom) + 16px);
-      }
+      .fab { right: calc(constant(safe-area-inset-right) + 14px); bottom: calc(constant(safe-area-inset-bottom) + 16px); }
     }
 
     .leaflet-control { border-radius: 8px; overflow: hidden; }
-  
+
     @media (max-width: 480px) {
       .toolbar { gap: 6px; }
       .btn { font-size: 11px; padding: 5px 9px; }
       .btn.pill { padding: 4px 8px; }
     }
-    </style>
-    
+  </style>
 </head>
 <body>
   <div id="map"></div>
@@ -97,6 +87,8 @@
       <button class="btn pill" id="modeToday">Heute</button>
       <button class="btn pill" id="modeTomorrow">Morgen</button>
       <button class="btn pill" id="modeDayAfter">Übermorgen</button>
+      <button class="btn pill" id="autoLog">Auto‑Log</button>
+      <button class="btn pill" id="snapExport">Export</button>
     </div>
   </div>
 
@@ -114,16 +106,17 @@
       });
     }
 
-    function setStatus(msg){
-      var s = document.getElementById('status'); s.textContent = msg; s.style.display='block';
+    function setStatus(msg, cls){
+      var s = document.getElementById('status'); s.textContent = msg; s.className = 'status '+(cls||''); s.style.display='block';
       clearTimeout(s._t); s._t = setTimeout(function(){ s.style.display='none'; }, 1800);
     }
-
     function cssVar(name, fallback){ 
       var v = getComputedStyle(document.documentElement).getPropertyValue(name);
       v = v ? v.trim() : '';
       return v || fallback;
     }
+
+    // --- Points of route ---
     const points = [
       { name: "Grosshöchstetten (CH)", lat: 46.906, lon: 7.638 },
       { name: "Interlaken (CH)",       lat: 46.686, lon: 7.863 },
@@ -189,17 +182,17 @@
     var routeGroup = L.layerGroup().addTo(map);
     var routeBounds = null;
     var routeCoords = null;
-    function drawCased(coords, color) {
-      L.polyline(coords, { color: cssVar('--route-outline','#ffffff'), weight: 9, opacity: 0.95 }).addTo(routeGroup);
+    function drawCased(coords, color, outline){
+      L.polyline(coords, { color: outline || cssVar('--route-outline','#ffffff'), weight: 9, opacity: 0.95 }).addTo(routeGroup);
       L.polyline(coords, { color: color, weight: 6, opacity: 1.0 }).addTo(routeGroup);
     }
 
-    // --- GPX file list (your names) ---
+    // --- GPX support (filenames from previous step) ---
     const GPX_FILES = [
       'gpx/stegra_route_tag_1.gpx',
       'gpx/stegra_route_tag_2.gpx',
       'gpx/stegra_route_tag_3.gpx',
-      'gpx/stegra_route_tag_4',       // falls ohne .gpx hochgeladen
+      'gpx/stegra_route_tag_4.gpx',
       'gpx/stegra_route_tag_5_1.gpx',
       'gpx/stegra_route_tag_5_2.gpx'
     ];
@@ -226,41 +219,20 @@
       return out;
     }
 
-    async function fetchTry(url){
-      try {
-        const res = await fetch(url, { cache: 'no-cache' });
-        if (!res.ok) throw new Error('HTTP '+res.status);
-        return await res.text();
-      } catch(e){ return null; }
-    }
-
-    async function loadOneGpxEntry(entry){
-      // Try exact
-      let text = await fetchTry(entry);
-      if (text) return text;
-      // If no extension provided, try with ".gpx"
-      if (!/\\.gpx$/i.test(entry)) {
-        text = await fetchTry(entry + '.gpx');
-        if (text) return text;
-      }
-      return null;
-    }
-
     async function loadGPX(){
       if (!GPX_FILES || GPX_FILES.length === 0) return false;
       setStatus('Lade GPX-Tracks …');
       let merged = [];
-      for (const entry of GPX_FILES){
-        const text = await loadOneGpxEntry(entry);
-        if (!text) { console.warn('GPX fehlt:', entry); continue; }
-        const coords = parseGPX(text);
-        if (coords.length) merged = merged.concat(coords);
-        else console.warn('Keine Punkte in', entry);
+      for (const file of GPX_FILES){
+        try {
+          const res = await fetch(file, { cache: 'no-cache' });
+          if (!res.ok) throw new Error(file+' '+res.status);
+          const text = await res.text();
+          const coords = parseGPX(text);
+          if (coords.length) { merged = merged.concat(coords); } else { console.warn('Keine Punkte in', file); }
+        } catch (e){ console.warn('GPX Ladefehler', file, e); }
       }
-      if (merged.length < 2) {
-        setStatus('GPX nicht gefunden – zeige Fallback/OSRM.');
-        return false;
-      }
+      if (merged.length < 2) { setStatus('GPX nicht gefunden – zeige Fallback/OSRM.'); return false; }
       merged = downsample(merged, 8000);
       routeGroup.clearLayers();
       drawCased(merged, cssVar('--route','#6b705c'));
@@ -316,7 +288,7 @@
       }
     })();
 
-    // --- Weather ---
+    // --- Weather / Popups ---
     function windyLink(lat, lon){ var z=8; return 'https://www.windy.com/'+lat.toFixed(3)+'/'+lon.toFixed(3)+'?'+lat.toFixed(3)+','+lon.toFixed(3)+','+z; }
     var codeMap = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",85:"Schneeschauer 🌨️",86:"Starke Schneeschauer 🌨️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"};
     function fmt(n, unit){ return (n==null || isNaN(n)) ? '-' : (Math.round(n)+(unit||'')); }
@@ -349,6 +321,118 @@
       }
     }
 
+    // --- Snapshot log (local only) ---
+    const SNAP_KEY = 'mw-snaps-v1';
+    let snapData = [];
+    let snapsLayer = L.layerGroup().addTo(map);
+    let autoLogEnabled = true; // default ON
+    const MIN_INTERVAL_HOURS = 3; // don't auto-log more than once per X hours
+    function loadSnaps(){ try { snapData = JSON.parse(localStorage.getItem(SNAP_KEY) || '[]'); } catch(e){ snapData=[]; } }
+    function saveSnaps(){ try { localStorage.setItem(SNAP_KEY, JSON.stringify(snapData)); } catch(e){} }
+    function drawSnaps(){
+      snapsLayer.clearLayers();
+      snapData.forEach(s => {
+        const m = L.circleMarker([s.lat, s.lon], { radius: 5, weight: 2, color: getComputedStyle(document.documentElement).getPropertyValue('--snap').trim() || '#0ea5e9', fillOpacity:.7 });
+        const when = new Date(s.t).toLocaleString();
+        const desc = (s.wx_desc||''); const temp = (s.temp!=null? Math.round(s.temp)+'°C':'-'); const wind = (s.wind!=null? Math.round(s.wind)+' km/h':'-');
+        m.bindPopup('<strong>Snapshot</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc);
+        m.addTo(snapsLayer);
+      });
+      if (snapData.length>1){
+        const coords = snapData.map(s => [s.lat, s.lon]);
+        L.polyline(coords, { color: '#ffffff', weight: 7, opacity: .9 }).addTo(snapsLayer);
+        L.polyline(coords, { color: getComputedStyle(document.documentElement).getPropertyValue('--snap').trim() || '#0ea5e9', weight: 4, opacity: 1 }).addTo(snapsLayer);
+      }
+    }
+    function hoursBetween(a,b){ return Math.abs((b-a)/36e5); }
+    function lastSnap(){ return snapData.length? snapData[snapData.length-1]: null; }
+
+    async function snapshotNow(lat, lon){
+      // fetch current weather for snapshot
+      const url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&current=temperature_2m,precipitation,wind_speed_10m,weather_code&timezone=auto';
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        const cur = data.current || {};
+        const codeMapLocal = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",85:"Schneeschauer 🌨️",86:"Starke Schneeschauer 🌨️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"};
+        const rec = {
+          t: new Date().toISOString(),
+          lat: lat, lon: lon,
+          temp: cur.temperature_2m, wind: cur.wind_speed_10m, wx_code: cur.weather_code,
+          wx_desc: codeMapLocal[cur.weather_code] || ''
+        };
+        snapData.push(rec); saveSnaps(); drawSnaps();
+        setStatus('Snapshot gespeichert.');
+      } catch(e){
+        setStatus('Snapshot: Wetter nicht erreichbar');
+      }
+    }
+
+    async function tryAutoSnapshot(){
+      if (!autoLogEnabled) return;
+      loadSnaps();
+      const last = lastSnap();
+      const now = new Date();
+      if (last && hoursBetween(new Date(last.t), now) < MIN_INTERVAL_HOURS) {
+        setStatus('Auto‑Log übersprungen (zu frisch)');
+        return;
+      }
+      // use last known position (lastMe) or request once
+      if (lastMe){ snapshotNow(lastMe.lat, lastMe.lon); }
+      else {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition(function(pos){
+          snapshotNow(pos.coords.latitude, pos.coords.longitude);
+        }, function(err){ console.warn('AutoSnapshot Geo-Error', err); }, { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 });
+      }
+    }
+
+    // --- Export / Publish ---
+    function exportSnaps(){
+      loadSnaps();
+      if (!snapData.length){ alert('Keine Snapshots vorhanden.'); return; }
+      const fc = {
+        type: 'FeatureCollection',
+        generatedAt: new Date().toISOString(),
+        features: [
+          { type:'Feature', geometry:{ type:'LineString', coordinates: snapData.map(s => [s.lon, s.lat]) }, properties:{ kind:'snapline', points:snapData.length } },
+          *snapData.map(s => ({ type:'Feature', geometry:{ type:'Point', coordinates:[s.lon, s.lat] }, properties:{ t:s.t, temp:s.temp, wind:s.wind, wx_code:s.wx_code, wx_desc:s.wx_desc } }))
+        ]
+      };
+      const blob = new Blob([JSON.stringify(fc, null, 2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'history.json'; a.click(); URL.revokeObjectURL(a.href);
+      setStatus('Export erstellt (history.json)');
+    }
+
+    async function loadPublishedHistory(){
+      try {
+        const res = await fetch('history/history.json', { cache: 'no-cache' });
+        if (!res.ok) throw new Error(res.status);
+        const data = await res.json();
+        const features = data.features || [];
+        const histLayer = L.layerGroup().addTo(map);
+        // Draw line first (if exists)
+        const line = features.find(f => f.geometry && f.geometry.type==='LineString');
+        if (line){
+          const coords = line.geometry.coordinates.map(c => [c[1], c[0]]);
+          L.polyline(coords, { color: '#ffffff', weight: 8, opacity: .9 }).addTo(histLayer);
+          L.polyline(coords, { color: getComputedStyle(document.documentElement).getPropertyValue('--hist').trim() || '#8b5cf6', weight: 5, opacity: 1 }).addTo(histLayer);
+        }
+        // Draw points
+        features.filter(f => f.geometry && f.geometry.type==='Point').forEach(f => {
+          const c = f.geometry.coordinates; const p = f.properties || {};
+          const when = p.t ? new Date(p.t).toLocaleString() : '';
+          const temp = (p.temp!=null? Math.round(p.temp)+'°C':'-'); const wind = (p.wind!=null? Math.round(p.wind)+' km/h':'-');
+          const desc = p.wx_desc || '';
+          L.circleMarker([c[1], c[0]], { radius: 5, weight: 2, color: getComputedStyle(document.documentElement).getPropertyValue('--hist').trim() || '#8b5cf6', fillOpacity:.7 })
+            .bindPopup('<strong>Besuch</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc).addTo(histLayer);
+        });
+        setStatus('Veröffentlichte Besuche geladen');
+      } catch(e){
+        console.log('Keine veröffentlichte History gefunden.');
+      }
+    }
+
     // --- Geolocate (me) ---
     var meMarker = null;
     var lastMe = null;
@@ -370,7 +454,6 @@
         } else { map.setView([lat, lon], 11); }
       }
     }
-
     function locateMe(userAction, forceRecenter){
       var status = document.getElementById('status');
       status.style.display='block'; status.textContent = 'Bestimme deinen Standort …';
@@ -379,6 +462,8 @@
         var latitude = pos.coords.latitude, longitude = pos.coords.longitude;
         markMe(latitude, longitude, true);
         status.textContent = 'Zentriert.'; setTimeout(function(){ status.style.display='none'; }, 1600);
+        // After marking me, attempt auto snapshot (once per X hours)
+        tryAutoSnapshot();
       }, function(err){
         console.warn('Geo-Error', err);
         status.textContent = 'Standort nicht erlaubt – zeige Route.';
@@ -387,7 +472,28 @@
       }, { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 });
     }
 
-    // Auto-refresh every 20 min if visible and we have a position
+    // --- UI wiring for snaps ---
+    document.getElementById('autoLog').addEventListener('click', function(){
+      autoLogEnabled = !autoLogEnabled;
+      this.classList.toggle('active', autoLogEnabled);
+      this.textContent = autoLogEnabled ? 'Auto‑Log' : 'Auto‑Log aus';
+      try { localStorage.setItem('mw-autolog', JSON.stringify(autoLogEnabled)); } catch(e){}
+      setStatus(autoLogEnabled ? 'Auto‑Log an' : 'Auto‑Log aus');
+    });
+    document.getElementById('snapExport').addEventListener('click', function(){ exportSnaps(); });
+
+    // Persist autoLog setting
+    (function initAutoLog(){
+      try {
+        const saved = JSON.parse(localStorage.getItem('mw-autolog')||'true');
+        autoLogEnabled = !!saved;
+        const btn = document.getElementById('autoLog');
+        if (autoLogEnabled) btn.classList.add('active');
+        btn.textContent = autoLogEnabled ? 'Auto‑Log' : 'Auto‑Log aus';
+      } catch(e){}
+    })();
+
+    // --- Auto-refresh weather ---
     setInterval(function(){
       if (document.visibilityState === 'visible' && lastMe && meMarker) {
         loadPopupGeneric('Dein Standort', lastMe.lat, lastMe.lon, meMarker);
@@ -402,6 +508,8 @@
     }
 
     (function start(){
+      loadSnaps(); drawSnaps();
+      loadPublishedHistory();
       fitRoute();
       locateMe(false);
     })();
