@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Motorrad Live-Wetterkarte – Adventure Light (schnell & Wetter)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <style>
+    :root {
+      --bg: #f9fafb; --text: #111827; --muted: #6b7280;
+      --label-bg: #1f2937; --label-border: rgba(255,255,255,.9); --label-shadow: 0 1px 0 rgba(0,0,0,.25);
+      --route: #6b705c; --route-outline: #ffffff; --fallback: #9ca3af;
+      --me: #2563eb; --ok: #16a34a; --warn: #b45309; --err: #b91c1c;
+      --btn-bg: rgba(255,255,255,.95); --btn-br: #e5e7eb; --btn-tx: #111827;
+    }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
+    #map { width: 100%; height: 100vh; }
+    .toolbar { position: absolute; top: 12px; left: 12px; display: grid; gap: 8px; z-index: 1000; }
+    .btn {
+      appearance: none; border: 1px solid var(--btn-br); background: var(--btn-bg); color: var(--btn-tx);
+      border-radius: 10px; padding: 8px 10px; font: 600 13px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.06); min-width: 44px;
+    }
+    .status { position: absolute; bottom: 12px; left: 12px; z-index: 1000;
+      background: var(--btn-bg); border: 1px solid var(--btn-br); border-radius: 10px; padding: 8px 10px;
+      font: 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: var(--muted); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+    .label-marker { transform: translate(-50%, -34px); }
+    .label-marker > div {
+      display: inline-block; padding: 4px 10px; border-radius: 999px;
+      background: var(--label-bg); color: #fff; font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      border: 2px solid var(--label-border); box-shadow: 0 6px 16px rgba(0,0,0,.18);
+      white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis;
+      letter-spacing: .2px; text-shadow: var(--label-shadow);
+    }
+    .leaflet-control { border-radius: 8px; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="toolbar">
+    <button class="btn" id="fit">Route zentrieren</button>
+    <button class="btn" id="locate">Mich orten</button>
+    <button class="btn" id="share">Link teilen</button>
+    <button class="btn" id="toggleTopo">Topo an/aus</button>
+    <button class="btn" id="retry">Route neu laden</button>
+  </div>
+  <div class="status" id="status">Lade Straßenroute …</div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    // Waypoints
+    const points = [
+      { name: "Grosshöchstetten (CH)", lat: 46.906, lon: 7.638 },
+      { name: "Interlaken (CH)",       lat: 46.686, lon: 7.863 },
+      { name: "Andermatt (CH)",        lat: 46.637, lon: 8.593 },
+      { name: "Chur (CH)",             lat: 46.850, lon: 9.532 },
+      { name: "St. Moritz (CH)",       lat: 46.490, lon: 9.835 },
+      { name: "Bormio (IT)",           lat: 46.468, lon: 10.366 },
+      { name: "Bozen (IT)",            lat: 46.498, lon: 11.354 },
+      { name: "Pieve di Cadore (IT)",  lat: 46.427, lon: 12.368 },
+      { name: "Tolmezzo (IT)",         lat: 46.402, lon: 13.020 },
+      { name: "Bovec (SI)",            lat: 46.338, lon: 13.552 },
+      { name: "Tolmin (SI)",           lat: 46.185, lon: 13.733 },
+      { name: "Ajdovščina (SI)",       lat: 45.886, lon: 13.909 },
+      { name: "Nova Vas (SI)",         lat: 45.755, lon: 14.514 },
+      { name: "Kočevje (SI)",          lat: 45.643, lon: 14.863 },
+      { name: "Sopac (HR)",            lat: 45.132, lon: 14.941 },
+      { name: "Breze (HR)",            lat: 44.997, lon: 14.987 },
+      { name: "Senj (HR)",             lat: 44.989, lon: 14.905 }
+    ];
+
+    const stripCountry = (s) => s.replace(/\s*\([A-Z]{2}\)\s*$/, '');
+
+    // Basemap
+    const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; OSM & CARTO' });
+    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: 'Map data: &copy; OSM, SRTM | Style: OpenTopoMap (CC-BY-SA)' });
+    const map = L.map('map', { layers: [cartoLight] });
+
+    // Fix initial render
+    window.addEventListener('load', () => setTimeout(() => map.invalidateSize(), 150));
+
+    // Toolbar
+    let topoOn = false;
+    document.getElementById('toggleTopo').addEventListener('click', () => {
+      if (topoOn) { map.removeLayer(topo); topoOn = false; }
+      else { topo.addTo(map); topoOn = true; }
+    });
+    document.getElementById('fit').addEventListener('click', () => map.fitBounds(L.latLngBounds(points.map(p => [p.lat, p.lon])), { padding: [24,24] }));
+    document.getElementById('locate').addEventListener('click', () => {
+      if (!navigator.geolocation) return alert('Geolocation nicht verfügbar.');
+      navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude, longitude } = pos.coords;
+        const me = L.circleMarker([latitude, longitude], { radius: 6, weight: 2, color: getComputedStyle(document.documentElement).getPropertyValue('--me').trim(), fillOpacity: .6 }).addTo(map);
+        me.bindPopup('Dein Standort').openPopup();
+        map.setView([latitude, longitude], 10);
+      }, () => alert('Konnte Standort nicht bestimmen.'));
+    });
+    document.getElementById('share').addEventListener('click', async () => {
+      const url = location.href;
+      if (navigator.share) { try { await navigator.share({ title: document.title, url }); } catch(e){} }
+      else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } }
+    });
+    document.getElementById('retry').addEventListener('click', () => loadOSRM(true));
+
+    // Weather helpers
+    const codeMap = {
+      0: "Klar ☀️", 1: "Überwiegend klar 🌤️", 2: "Wechselhaft ⛅", 3: "Bedeckt ☁️",
+      45: "Nebel 🌫️", 48: "Reif/Nebel 🌫️",
+      51: "Nieselregen 🌦️", 53: "Nieselregen 🌦️", 55: "Nieselregen 🌦️",
+      56: "Gefrierender Niesel 🌧️❄️", 57: "Gefrierender Niesel 🌧️❄️",
+      61: "Regen 🌧️", 63: "Regen 🌧️", 65: "Starker Regen 🌧️",
+      66: "Gefrierender Regen 🌧️❄️", 67: "Gefrierender Regen 🌧️❄️",
+      71: "Schnee 🌨️", 73: "Schnee 🌨️", 75: "Starker Schnee 🌨️",
+      77: "Schneegriesel 🌨️",
+      80: "Schauer 🌦️", 81: "Schauer 🌦️", 82: "Starke Schauer 🌧️",
+      85: "Schneeschauer 🌨️", 86: "Starke Schneeschauer 🌨️",
+      95: "Gewitter ⛈️", 96: "Gewitter mit Hagel ⛈️", 97: "Gewitter mit Hagel ⛈️"
+    };
+    function fmt(n, unit){ return (n==null || Number.isNaN(n)) ? '-' : `${Math.round(n)}${unit||''}`; }
+    function windyLink(lat, lon){ const z=8; return `https://www.windy.com/${lat.toFixed(3)}/${lon.toFixed(3)}?${lat.toFixed(3)},${lon.toFixed(3)},${z}`; }
+    async function loadPopup(p, marker) {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}` +
+                  `&current=temperature_2m,precipitation,wind_speed_10m,weather_code` +
+                  `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max` +
+                  `&timezone=auto`;
+      try {
+        const res = await fetch(url); const data = await res.json();
+        const cur = data.current || {}; const daily = data.daily || {};
+        const wdesc = codeMap[cur.weather_code] || "–";
+        const hi = daily.temperature_2m_max?.[0]; const lo = daily.temperature_2m_min?.[0];
+        const pop = daily.precipitation_probability_max?.[0];
+        const html = `
+          <div>
+            <strong>${p.name}</strong><br/>
+            Jetzt: <strong>${fmt(cur.temperature_2m, "°C")}</strong> | ${wdesc}<br/>
+            Wind: ${fmt(cur.wind_speed_10m, " km/h")} · Niederschlag: ${fmt(cur.precipitation, " mm/h")}<br/>
+            <span style="color:var(--muted);font-size:12px;">Heute: Max ${fmt(hi, "°C")} · Min ${fmt(lo, "°C")} · Regenwkt. ${pop ?? "-"}%</span><br/>
+            <a href="${windyLink(p.lat, p.lon)}" target="_blank" rel="noopener">Details auf Windy öffnen</a>
+          </div>`;
+        marker.bindPopup(html).openPopup();
+      } catch (e) {
+        marker.bindPopup(`<div><strong>${p.name}</strong><br/><span style="color:var(--muted);">Live-Wetter nicht erreichbar.</span></div>`).openPopup();
+      }
+    }
+
+    // Markers with labels + click for weather
+    const markers = [];
+    points.forEach((p, i) => {
+      const m = L.marker([p.lat, p.lon], { icon: L.divIcon({ className:'label-marker', html:`<div>${stripCountry(p.name)}</div>`, iconSize:[10,10], iconAnchor:[10,24], popupAnchor:[0,-20] })}).addTo(map);
+      m.on('click', () => { m.bindPopup('<div>Lade Live-Wetter…</div>').openPopup(); loadPopup(p, m); });
+      markers.push(m);
+    });
+
+    // Initial view
+    const latlngs = points.map(p => [p.lat, p.lon]);
+    map.fitBounds(L.latLngBounds(latlngs), { padding: [24,24] });
+
+    // Fallback line shown immediately
+    const fallbackGroup = L.layerGroup().addTo(map);
+    const fallbackOutline = L.polyline(latlngs, { color: getComputedStyle(document.documentElement).getPropertyValue('--route-outline').trim(), weight: 6, opacity: .9, dashArray: '6 8' }).addTo(fallbackGroup);
+    const fallbackLine = L.polyline(latlngs, { color: getComputedStyle(document.documentElement).getPropertyValue('--fallback').trim(), weight: 3, opacity: .9, dashArray: '6 8' }).addTo(fallbackGroup);
+
+    // Route group
+    const routeGroup = L.layerGroup().addTo(map);
+    function drawCased(coords, color) {
+      const outline = L.polyline(coords, { color: getComputedStyle(document.documentElement).getPropertyValue('--route-outline').trim(), weight: 8, opacity: 0.9 }).addTo(routeGroup);
+      const main = L.polyline(coords, { color, weight: 5, opacity: 1.0 }).addTo(routeGroup);
+      return [outline, main];
+    }
+
+    // Polyline6 decoder
+    function decodePolyline6(str){
+      let index = 0, lat = 0, lon = 0, coords = [];
+      const factor = 1e-6;
+      while (index < str.length) {
+        let b, res = 0, sh = 0;
+        do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
+        const dlat = (res & 1) ? ~(res >> 1) : (res >> 1); lat += dlat;
+        res = 0; sh = 0;
+        do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
+        const dlon = (res & 1) ? ~(res >> 1) : (res >> 1); lon += dlon;
+        coords.push([lat * factor, lon * factor]);
+      }
+      return coords;
+    }
+
+    // Single batched OSRM request
+    function osrmUrlAll(points) {
+      const coords = points.map(p => `${p.lon},${p.lat}`).join(';');
+      return `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=polyline6&alternatives=false&steps=false&continue_straight=true`;
+    }
+
+    async function fetchWithTimeout(url, ms){
+      const ctrl = new AbortController(); const id = setTimeout(()=>ctrl.abort(), ms);
+      try { const res = await fetch(url, { signal: ctrl.signal }); return res; }
+      finally { clearTimeout(id); }
+    }
+
+    async function loadOSRM(userTriggered=false) {
+      const status = document.getElementById('status');
+      status.textContent = userTriggered ? 'Route neu laden …' : 'Lade Straßenroute …';
+      routeGroup.clearLayers();
+
+      try {
+        const res = await fetchWithTimeout(osrmUrlAll(points), 5000);
+        if (!res.ok) throw new Error('OSRM Fehler ' + res.status);
+        const data = await res.json();
+        if (!data.routes || !data.routes[0]) throw new Error('Keine Route gefunden');
+        const coords = decodePolyline6(data.routes[0].geometry).map(([la,lo]) => [la, lo]);
+        drawCased(coords, getComputedStyle(document.documentElement).getPropertyValue('--route').trim());
+        map.removeLayer(fallbackGroup);
+        status.textContent = 'Fertig.';
+        setTimeout(()=>{ status.style.display='none'; }, 1500);
+      } catch (e) {
+        console.warn('OSRM fehlgeschlagen oder zu langsam', e);
+        status.innerHTML = 'Konnte Straßenroute nicht laden – zeige Fallback. <button class="btn" id="again">Erneut versuchen</button>';
+        const again = document.getElementById('again');
+        if (again) again.onclick = () => loadOSRM(true);
+      }
+    }
+
+    loadOSRM(); // start immediately
+  </script>
+</body>
+</html>
