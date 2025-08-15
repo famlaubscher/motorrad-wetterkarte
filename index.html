@@ -396,7 +396,7 @@
         generatedAt: new Date().toISOString(),
         features: [
           { type:'Feature', geometry:{ type:'LineString', coordinates: snapData.map(s => [s.lon, s.lat]) }, properties:{ kind:'snapline', points:snapData.length } },
-          *snapData.map(s => ({ type:'Feature', geometry:{ type:'Point', coordinates:[s.lon, s.lat] }, properties:{ t:s.t, temp:s.temp, wind:s.wind, wx_code:s.wx_code, wx_desc:s.wx_desc } }))
+          ...snapData.map(s => ({ type:'Feature', geometry:{ type:'Point', coordinates:[s.lon, s.lat] }, properties:{ t:s.t, temp:s.temp, wind:s.wind, wx_code:s.wx_code, wx_desc:s.wx_desc } }))
         ]
       };
       const blob = new Blob([JSON.stringify(fc, null, 2)], {type:'application/json'});
