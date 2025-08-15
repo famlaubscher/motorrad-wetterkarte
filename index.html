@@ -28,13 +28,22 @@
 
     .toolbar { position: absolute; top: 12px; left: 12px; display: grid; gap: 8px; z-index: 1000; }
     .btn {
-      appearance: none; border: 1px solid var(--btn-br); background: var(--btn-bg); color: var(--btn-tx);
-      border-radius: 10px; padding: 8px 10px; font: 600 13px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.06); min-width: 44px;
+      appearance: none;
+      border: 2px solid var(--chip-br);
+      background: var(--chip-bg);
+      color: #fff;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,.18);
+      min-width: 40px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     .segbtns { display:flex; gap:6px; }
-    .btn.pill { border-radius: 999px; padding: 6px 10px; }
-    .btn.active { border-color:#111827; box-shadow: 0 1px 0 rgba(0,0,0,.12); }
+    .btn.pill { border-radius: 999px; padding: 5px 9px; }
+    .btn.active { box-shadow: 0 6px 14px rgba(0,0,0,.22); border-color: rgba(255,255,255,1); }
 
     .status { position: absolute; bottom: 12px; left: 12px; z-index: 1000;
       background: var(--btn-bg); border: 1px solid var(--btn-br); border-radius: 10px; padding: 8px 10px;
@@ -68,15 +77,22 @@
     }
 
     .leaflet-control { border-radius: 8px; overflow: hidden; }
-  </style>
+  
+    @media (max-width: 480px) {
+      .toolbar { gap: 6px; }
+      .btn { font-size: 11px; padding: 5px 9px; }
+      .btn.pill { padding: 4px 8px; }
+    }
+    </style>
+    
 </head>
 <body>
   <div id="map"></div>
 
   <div class="toolbar">
-    <button class="btn" id="fit">Route zentrieren</button>
-    <button class="btn" id="locate">Mich orten</button>
-    <button class="btn" id="share">Link teilen</button>
+    <button class="btn" id="fit">Zentrieren</button>
+    <button class="btn" id="locate">Ortung</button>
+    <button class="btn" id="share">Teilen</button>
     <div class="segbtns">
       <button class="btn pill" id="modeToday">Heute</button>
       <button class="btn pill" id="modeTomorrow">Morgen</button>
