@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Motorrad Live-Wetterkarte – Weather Focus (Auto-Zoom v2)</title>
+  <title>Motorrad Live-Wetterkarte – Weather Focus (ohne Übersicht, Auto-Locate)</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <style>
@@ -171,7 +171,7 @@
       }
     })();
 
-    // --- Auto-zoom to current location on load (iPhone friendly) ---
+    // --- Auto-zoom to current location on load ---
     let meMarker = null;
     function markMe(lat, lon){
       if (meMarker) { map.removeLayer(meMarker); }
@@ -183,23 +183,23 @@
     function fitRoute(){
       const b = routeBounds || L.latLngBounds(latlngs);
       map.fitBounds(b, { padding: [24,24] });
-      const s = document.getElementById('status'); s.textContent = 'Route zentriert.'; s.style.display='block'; setTimeout(()=>{ s.style.display='none'; }, 1200);
+      const s = document.getElementById('status'); s.textContent = 'Route zentriert.'; s.style.display='block'; setTimeout(()=>{ s.style.display='none'; }, 1000);
     }
 
-    // Simple nearest distance (approx) between user and polyline
+    // Approx nearest distance between a point and sampled route coords
     function toRad(x){ return x*Math.PI/180; }
-    function hav(dlat, dlon, lat1){
-      const R=6371000; // m
-      const a = Math.sin(dlat/2)**2 + Math.cos(lat1) * Math.cos(lat1 + dlat) * Math.sin(dlon/2)**2;
+    function haversine(lat1, lon1, lat2, lon2){
+      const R=6371000;
+      const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
       return 2*R*Math.asin(Math.sqrt(a));
     }
     function nearestDistanceMeters(lat, lon, coords){
       if (!coords || coords.length===0) return Infinity;
       let best = Infinity;
-      const lat1 = toRad(lat);
-      for (let i=0;i<coords.length;i+=20){ // sample every ~20 points for speed
+      for (let i=0;i<coords.length;i+=20){ // sample every ~20 points
         const c = coords[i];
-        const d = hav(toRad(c[0]-lat), toRad(c[1]-lon), lat1);
+        const d = haversine(lat, lon, c[0], c[1]);
         if (d<best) best=d;
       }
       return best;
@@ -216,15 +216,14 @@
 
         if (routeCoords && routeCoords.length){
           const dist = nearestDistanceMeters(latitude, longitude, routeCoords);
-          if (dist < 30000){ // < 30 km vom Routenverlauf
+          if (dist < 30000){ // nahe Route
             map.setView([latitude, longitude], 11);
             status.textContent = 'Zentriert auf dich (nahe Route).';
           } else if (routeBounds){
-            // show both: route + user
-            const combo = routeBounds.pad(0); // clone
+            const combo = routeBounds.pad(0);
             combo.extend([latitude, longitude]);
             map.fitBounds(combo, { padding: [28,28] });
-            status.textContent = 'Route + Standort im Blick. Tipp: „Route zentrieren“. ';
+            status.textContent = 'Route + Standort im Blick. Tipp: „Route zentrieren“.';
           } else {
             map.setView([latitude, longitude], 11);
             status.textContent = 'Zentriert auf dich.';
@@ -233,19 +232,19 @@
           map.setView([latitude, longitude], 11);
           status.textContent = 'Zentriert auf dich.';
         }
-        setTimeout(()=>{ status.style.display='none'; }, 1800);
+        setTimeout(()=>{ status.style.display='none'; }, 1600);
       }, err => {
         console.warn('Geo-Error', err);
         status.textContent = 'Standort nicht erlaubt – zeige Route.';
         fitRoute();
-        setTimeout(()=>{ status.style.display='none'; }, 1800);
+        setTimeout(()=>{ status.style.display='none'; }, 1600);
       }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 60000 });
     }
 
     // Try auto-locate on startup; fallback to route if denied/timeout
     locateMe(false);
 
-    // Weather popups
+    // Weather popups (selected day + small 'now' line)
     const codeMap = {
       0: "Klar ☀️", 1: "Überwiegend klar 🌤️", 2: "Wechselhaft ⛅", 3: "Bedeckt ☁️",
       45: "Nebel 🌫️", 48: "Reif/Nebel 🌫️",
