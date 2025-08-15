@@ -1,5 +1,5 @@
 // Simple PWA Service Worker for Moto Wetter
-const VERSION = 'mw-v1.4.1';
+const VERSION = 'mw-v1.4.2'; // bumped
 const APP_SHELL = [
   './',
   './index.html',
