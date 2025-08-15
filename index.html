@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live-Wetterkarte – Motorradroute</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { width: 100%; height: 100vh; }
+    .popup { font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    .popup h3 { margin: 0 0 6px; font-size: 16px; }
+    .small { font-size: 12px; color: #555; }
+    .row { margin: 4px 0; }
+    .badge { display: inline-block; padding: 2px 6px; border-radius: 6px; background: #f2f2f2; margin-right: 6px; }
+    .link { display: inline-block; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script>
+    const points = [
+      { name: "Grosshöchstetten (CH)", lat: 46.906, lon: 7.638 },
+      { name: "Interlaken (CH)",       lat: 46.686, lon: 7.863 },
+      { name: "Andermatt (CH)",        lat: 46.637, lon: 8.593 },
+      { name: "Chur (CH)",             lat: 46.850, lon: 9.532 },
+      { name: "St. Moritz (CH)",       lat: 46.490, lon: 9.835 },
+      { name: "Bormio (IT)",           lat: 46.468, lon: 10.366 },
+      { name: "Bozen (IT)",            lat: 46.498, lon: 11.354 },
+      { name: "Pieve di Cadore (IT)",  lat: 46.427, lon: 12.368 },
+      { name: "Tolmezzo (IT)",         lat: 46.402, lon: 13.020 },
+      { name: "Bovec (SI)",            lat: 46.338, lon: 13.552 },
+      { name: "Tolmin (SI)",           lat: 46.185, lon: 13.733 },
+      { name: "Ajdovščina (SI)",       lat: 45.886, lon: 13.909 },
+      { name: "Nova Vas (SI)",         lat: 45.755, lon: 14.514 },
+      { name: "Kočevje (SI)",          lat: 45.643, lon: 14.863 },
+      { name: "Sopac (HR)",            lat: 45.132, lon: 14.941 },
+      { name: "Breze (HR)",            lat: 44.997, lon: 14.987 },
+      { name: "Senj (HR)",             lat: 44.989, lon: 14.905 }
+    ];
+
+    const map = L.map('map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> Mitwirkende'
+    }).addTo(map);
+
+    const latlngs = points.map(p => [p.lat, p.lon]);
+    const routeLine = L.polyline(latlngs, { weight: 4, opacity: 0.7 }).addTo(map);
+    map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+
+    const codeMap = {
+      0: "Klar ☀️", 1: "Überwiegend klar 🌤️", 2: "Wechselhaft ⛅", 3: "Bedeckt ☁️",
+      45: "Nebel 🌫️", 48: "Reif/Nebel 🌫️",
+      51: "Nieselregen 🌦️", 53: "Nieselregen 🌦️", 55: "Nieselregen 🌦️",
+      56: "Gefrierender Niesel 🌧️❄️", 57: "Gefrierender Niesel 🌧️❄️",
+      61: "Regen 🌧️", 63: "Regen 🌧️", 65: "Starker Regen 🌧️",
+      66: "Gefrierender Regen 🌧️❄️", 67: "Gefrierender Regen 🌧️❄️",
+      71: "Schnee 🌨️", 73: "Schnee 🌨️", 75: "Starker Schnee 🌨️",
+      77: "Schneegriesel 🌨️",
+      80: "Schauer 🌦️", 81: "Schauer 🌦️", 82: "Starke Schauer 🌧️",
+      85: "Schneeschauer 🌨️", 86: "Starke Schneeschauer 🌨️",
+      95: "Gewitter ⛈️", 96: "Gewitter mit Hagel ⛈️", 97: "Gewitter mit Hagel ⛈️"
+    };
+
+    function fmt(n, unit) {
+      if (n === null || n === undefined || Number.isNaN(n)) return "-";
+      return `${Math.round(n)}${unit || ""}`;
+    }
+
+    function windyLink(lat, lon) {
+      const z = 8;
+      return `https://www.windy.com/${lat.toFixed(3)}/${lon.toFixed(3)}?${lat.toFixed(3)},${lon.toFixed(3)},${z}`;
+    }
+
+    async function loadWeather(p, marker) {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}` +
+                    `&current=temperature_2m,precipitation,wind_speed_10m,weather_code` +
+                    `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max` +
+                    `&timezone=auto`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const cur = data.current || {};
+        const daily = data.daily || {};
+        const hi = daily.temperature_2m_max ? daily.temperature_2m_max[0] : null;
+        const lo = daily.temperature_2m_min ? daily.temperature_2m_min[0] : null;
+        const pop = daily.precipitation_probability_max ? daily.precipitation_probability_max[0] : null;
+
+        const wdesc = codeMap[cur.weather_code] || "–";
+
+        const html = `
+          <div class="popup">
+            <h3>${p.name}</h3>
+            <div class="row">
+              <span class="badge">Jetzt: ${fmt(cur.temperature_2m, "°C")} | ${wdesc}</span>
+              <span class="badge">Wind: ${fmt(cur.wind_speed_10m, " km/h")}</span>
+              <span class="badge">Niederschlag: ${fmt(cur.precipitation, " mm/h")}</span>
+            </div>
+            <div class="row small">Heute: Max ${fmt(hi, "°C")} · Min ${fmt(lo, "°C")} · Regenwkt. ${pop !== null && pop !== undefined ? pop + "%" : "-"}</div>
+            <a class="link" href="${windyLink(p.lat, p.lon)}" target="_blank" rel="noopener">Details auf Windy öffnen</a>
+          </div>
+        `;
+        marker.bindPopup(html);
+      } catch (e) {
+        const html = `
+          <div class="popup">
+            <h3>${p.name}</h3>
+            <div>Live-Daten konnten gerade nicht geladen werden.</div>
+            <div class="small">Tipp: Internetverbindung prüfen und Karte neu laden.</div>
+            <a class="link" href="${windyLink(p.lat, p.lon)}" target="_blank" rel="noopener">Alternativ: Windy öffnen</a>
+          </div>
+        `;
+        marker.bindPopup(html);
+      }
+    }
+
+    points.forEach(p => {
+      const m = L.marker([p.lat, p.lon]).addTo(map);
+      m.bindPopup(`<div class="popup"><h3>${p.name}</h3><div class="small">Lade Live-Wetter…</div></div>`);
+      loadWeather(p, m);
+    });
+  </script>
+</body>
+</html>
