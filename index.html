@@ -4,32 +4,67 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live-Wetterkarte – Motorradroute</title>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
+  <title>Motorrad Live-Wetterkarte – Adventure Light (Straßenrouting, minimal v2)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <style>
-    html, body { height: 100%; margin: 0; }
+    :root {
+      --bg: #f9fafb;
+      --text: #111827;
+      --muted: #6b7280;
+      --label-bg: #1f2937;
+      --label-border: rgba(255,255,255,.9);
+      --label-shadow: 0 1px 0 rgba(0,0,0,.25);
+      --route: #6b705c;      /* sage */
+      --route-alt: #8d7b68;  /* brownish */
+      --route-outline: #ffffff;
+      --fallback: #9ca3af;   /* grey for initial dashed */
+      --me: #2563eb;
+      --ok: #16a34a; --warn: #b45309; --err: #b91c1c;
+      --btn-bg: rgba(255,255,255,.95);
+      --btn-br: #e5e7eb;
+      --btn-tx: #111827;
+    }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
     #map { width: 100%; height: 100vh; }
-    .popup { font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-    .popup h3 { margin: 0 0 6px; font-size: 16px; }
-    .small { font-size: 12px; color: #555; }
-    .row { margin: 4px 0; }
-    .badge { display: inline-block; padding: 2px 6px; border-radius: 6px; background: #f2f2f2; margin-right: 6px; }
-    .link { display: inline-block; margin-top: 6px; }
+
+    .toolbar { position: absolute; top: 12px; left: 12px; display: grid; gap: 8px; background: transparent; z-index: 1000; }
+    .btn {
+      appearance: none; border: 1px solid var(--btn-br); background: var(--btn-bg); color: var(--btn-tx);
+      border-radius: 10px; padding: 8px 10px; font: 600 13px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.06); min-width: 44px;
+    }
+    .status {
+      position: absolute; bottom: 12px; left: 12px;
+      background: var(--btn-bg); border: 1px solid var(--btn-br); border-radius: 10px;
+      padding: 8px 10px; font: 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--muted); box-shadow: 0 1px 2px rgba(0,0,0,.06); z-index: 1000;
+    }
+
+    /* Label-style markers */
+    .label-marker { transform: translate(-50%, -34px); }
+    .label-marker > div {
+      display: inline-block; padding: 4px 10px; border-radius: 999px;
+      background: var(--label-bg); color: #fff; font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      border: 2px solid var(--label-border); box-shadow: 0 6px 16px rgba(0,0,0,.18);
+      white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis;
+      letter-spacing: .2px; text-shadow: var(--label-shadow);
+    }
+    .leaflet-control { border-radius: 8px; overflow: hidden; }
   </style>
 </head>
 <body>
   <div id="map"></div>
+  <div class="toolbar">
+    <button class="btn" id="fit">Route zentrieren</button>
+    <button class="btn" id="locate">Mich orten</button>
+    <button class="btn" id="share">Link teilen</button>
+    <button class="btn" id="toggleTopo">Topo an/aus</button>
+  </div>
+  <div class="status" id="status">Lade Karte …</div>
 
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
     const points = [
       { name: "Grosshöchstetten (CH)", lat: 46.906, lon: 7.638 },
@@ -51,87 +86,105 @@
       { name: "Senj (HR)",             lat: 44.989, lon: 14.905 }
     ];
 
-    const map = L.map('map');
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> Mitwirkende'
-    }).addTo(map);
+    const stripCountry = (s) => s.replace(/\s*\([A-Z]{2}\)\s*$/, '');
 
+    // Basemaps
+    const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19, attribution: '&copy; OSM & CARTO'
+    });
+    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      maxZoom: 17, attribution: 'Map data: &copy; OSM, SRTM | Style: OpenTopoMap (CC-BY-SA)'
+    });
+    const map = L.map('map', { layers: [cartoLight] });
+
+    let topoOn = false;
+    document.getElementById('toggleTopo').addEventListener('click', () => {
+      if (topoOn) { map.removeLayer(topo); topoOn = false; }
+      else { topo.addTo(map); topoOn = true; }
+    });
+
+    // Ensure initial render even on mobile Safari quirks
+    window.addEventListener('load', () => setTimeout(() => map.invalidateSize(), 200));
+
+    // Markers with labels
+    const markers = [];
+    points.forEach((p) => {
+      const m = L.marker([p.lat, p.lon], { icon: L.divIcon({
+        className:'label-marker',
+        html:`<div>${stripCountry(p.name)}</div>`,
+        iconSize:[10,10], iconAnchor:[10,24], popupAnchor:[0,-20]
+      })}).addTo(map);
+      markers.push(m);
+    });
+
+    // Immediate fallback route so you see something on load
     const latlngs = points.map(p => [p.lat, p.lon]);
-    const routeLine = L.polyline(latlngs, { weight: 4, opacity: 0.7 }).addTo(map);
-    map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+    const fallbackGroup = L.layerGroup().addTo(map);
+    const fallbackOutline = L.polyline(latlngs, { color: getComputedStyle(document.documentElement).getPropertyValue('--route-outline').trim(), weight: 6, opacity: .9, dashArray: '6 8' }).addTo(fallbackGroup);
+    const fallbackLine = L.polyline(latlngs, { color: getComputedStyle(document.documentElement).getPropertyValue('--fallback').trim(), weight: 3, opacity: .9, dashArray: '6 8' }).addTo(fallbackGroup);
 
-    const codeMap = {
-      0: "Klar ☀️", 1: "Überwiegend klar 🌤️", 2: "Wechselhaft ⛅", 3: "Bedeckt ☁️",
-      45: "Nebel 🌫️", 48: "Reif/Nebel 🌫️",
-      51: "Nieselregen 🌦️", 53: "Nieselregen 🌦️", 55: "Nieselregen 🌦️",
-      56: "Gefrierender Niesel 🌧️❄️", 57: "Gefrierender Niesel 🌧️❄️",
-      61: "Regen 🌧️", 63: "Regen 🌧️", 65: "Starker Regen 🌧️",
-      66: "Gefrierender Regen 🌧️❄️", 67: "Gefrierender Regen 🌧️❄️",
-      71: "Schnee 🌨️", 73: "Schnee 🌨️", 75: "Starker Schnee 🌨️",
-      77: "Schneegriesel 🌨️",
-      80: "Schauer 🌦️", 81: "Schauer 🌦️", 82: "Starke Schauer 🌧️",
-      85: "Schneeschauer 🌨️", 86: "Starke Schneeschauer 🌨️",
-      95: "Gewitter ⛈️", 96: "Gewitter mit Hagel ⛈️", 97: "Gewitter mit Hagel ⛈️"
-    };
+    // Fit to points immediately
+    map.fitBounds(L.latLngBounds(latlngs), { padding: [24,24] });
 
-    function fmt(n, unit) {
-      if (n === null || n === undefined || Number.isNaN(n)) return "-";
-      return `${Math.round(n)}${unit || ""}`;
+    // Routing group (OSRM)
+    const routeGroup = L.layerGroup().addTo(map);
+
+    function routeCased(coords, color) {
+      const outline = L.polyline(coords, { color: getComputedStyle(document.documentElement).getPropertyValue('--route-outline').trim(), weight: 8, opacity: 0.9 });
+      const main = L.polyline(coords, { color, weight: 5, opacity: 1.0 });
+      return L.layerGroup([outline, main]).addTo(routeGroup);
     }
 
-    function windyLink(lat, lon) {
-      const z = 8;
-      return `https://www.windy.com/${lat.toFixed(3)}/${lon.toFixed(3)}?${lat.toFixed(3)},${lon.toFixed(3)},${z}`;
+    async function fetchRoute(a, b, color) {
+      const url = `https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}` +
+                  `?overview=full&geometries=geojson&alternatives=false&steps=false`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('OSRM Fehler ' + res.status);
+      const data = await res.json();
+      if (!data.routes || !data.routes[0]) throw new Error('Keine Route gefunden');
+      const coords = data.routes[0].geometry.coordinates.map(([x,y]) => [y,x]);
+      return routeCased(coords, color);
     }
 
-    async function loadWeather(p, marker) {
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}` +
-                    `&current=temperature_2m,precipitation,wind_speed_10m,weather_code` +
-                    `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max` +
-                    `&timezone=auto`;
-        const res = await fetch(url);
-        const data = await res.json();
+    async function buildRoutes() {
+      const status = document.getElementById('status');
+      status.textContent = 'Berechne Straßenroute …';
+      routeGroup.clearLayers();
+      const segColors = ['#6b705c', '#8d7b68'];
+      let ok=0, fail=0;
 
-        const cur = data.current || {};
-        const daily = data.daily || {};
-        const hi = daily.temperature_2m_max ? daily.temperature_2m_max[0] : null;
-        const lo = daily.temperature_2m_min ? daily.temperature_2m_min[0] : null;
-        const pop = daily.precipitation_probability_max ? daily.precipitation_probability_max[0] : null;
-
-        const wdesc = codeMap[cur.weather_code] || "–";
-
-        const html = `
-          <div class="popup">
-            <h3>${p.name}</h3>
-            <div class="row">
-              <span class="badge">Jetzt: ${fmt(cur.temperature_2m, "°C")} | ${wdesc}</span>
-              <span class="badge">Wind: ${fmt(cur.wind_speed_10m, " km/h")}</span>
-              <span class="badge">Niederschlag: ${fmt(cur.precipitation, " mm/h")}</span>
-            </div>
-            <div class="row small">Heute: Max ${fmt(hi, "°C")} · Min ${fmt(lo, "°C")} · Regenwkt. ${pop !== null && pop !== undefined ? pop + "%" : "-"}</div>
-            <a class="link" href="${windyLink(p.lat, p.lon)}" target="_blank" rel="noopener">Details auf Windy öffnen</a>
-          </div>
-        `;
-        marker.bindPopup(html);
-      } catch (e) {
-        const html = `
-          <div class="popup">
-            <h3>${p.name}</h3>
-            <div>Live-Daten konnten gerade nicht geladen werden.</div>
-            <div class="small">Tipp: Internetverbindung prüfen und Karte neu laden.</div>
-            <a class="link" href="${windyLink(p.lat, p.lon)}" target="_blank" rel="noopener">Alternativ: Windy öffnen</a>
-          </div>
-        `;
-        marker.bindPopup(html);
+      for (let i=0; i<points.length-1; i++) {
+        const a = points[i], b = points[i+1];
+        const color = segColors[i % segColors.length];
+        try { await fetchRoute(a, b, color); ok++; }
+        catch(e) { console.warn('Routing fehlgeschlagen', e); fail++; }
       }
+
+      // If at least one segment succeeded, remove fallback
+      if (ok > 0) { map.removeLayer(fallbackGroup); }
+      status.innerHTML = fail===0
+        ? `Straßenroute geladen <span style="color:var(--ok);">(${ok} Segmente)</span>`
+        : `Teils geladen: <span style="color:var(--ok);">${ok} OK</span>, <span style="color:var(--err);">${fail} Fehler</span>`;
+      setTimeout(()=>{ status.style.display='none'; }, 4000);
     }
 
-    points.forEach(p => {
-      const m = L.marker([p.lat, p.lon]).addTo(map);
-      m.bindPopup(`<div class="popup"><h3>${p.name}</h3><div class="small">Lade Live-Wetter…</div></div>`);
-      loadWeather(p, m);
+    buildRoutes(); // run on load
+
+    // Buttons
+    document.getElementById('fit').addEventListener('click', () => map.fitBounds(L.latLngBounds(latlngs), { padding: [24,24] }));
+    document.getElementById('locate').addEventListener('click', () => {
+      if (!navigator.geolocation) return alert('Geolocation nicht verfügbar.');
+      navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude, longitude } = pos.coords;
+        const me = L.circleMarker([latitude, longitude], { radius: 6, weight: 2, color: getComputedStyle(document.documentElement).getPropertyValue('--me').trim(), fillOpacity: .6 }).addTo(map);
+        me.bindPopup('Dein Standort').openPopup();
+        map.setView([latitude, longitude], 10);
+      }, () => alert('Konnte Standort nicht bestimmen.'));
+    });
+    document.getElementById('share').addEventListener('click', async () => {
+      const url = location.href;
+      if (navigator.share) { try { await navigator.share({ title: document.title, url }); } catch(e){} }
+      else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } }
     });
   </script>
 </body>
