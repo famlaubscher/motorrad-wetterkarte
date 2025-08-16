@@ -33,7 +33,7 @@
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
     #map { width: 100%; height: 100vh; }
 
-    /* Splash / Loading */
+    /* Splash */
     .splash {
       position: fixed; inset: 0;
       padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
@@ -59,25 +59,25 @@
     }
     .logo { width: 64px; height: 64px; margin: 4px auto 8px; border-radius: 14px; display: grid; place-items: center; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.22); font-size: 30px; }
     .title { font: 900 18px/1.1 system-ui, -apple-system, Segoe UI, Roboto; letter-spacing: .2px; }
-    .subtitle { margin-top: 4px; color: var(--muted); font: 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto; }
+    .subtitle { margin-top: 4px; color: var(--muted); font: 12px/1.2 system-ui; }
     .progress { margin: 12px auto 8px; width: 100%; height: 8px; border-radius: 999px; background: rgba(255,255,255,.12); overflow: hidden; position: relative; }
     .progress .bar { position: absolute; left: -40%; top: 0; bottom: 0; width: 40%; border-radius: 999px; background: linear-gradient(90deg, rgba(56,189,248,.1), rgba(56,189,248,.8), rgba(56,189,248,.1)); animation: slide 1.2s infinite cubic-bezier(.4,0,.2,1); }
     @keyframes slide { 0% { left: -40%; } 100% { left: 100%; } }
     .tip { margin-top: 6px; font: 12px/1.2 system-ui; opacity: .8; }
     .splash.hide { opacity: 0; visibility: hidden; transition: opacity .28s ease; }
 
-    /* Status toast top-left */
+    /* Status toast */
     .status {
       position: absolute; top: calc(env(safe-area-inset-top, 0px) + 12px); left: 12px; z-index: 1500;
       background: var(--glass-bg); border: 1px solid var(--glass-br); border-radius: 12px; padding: 10px 12px;
-      font: 12px/1.3 system-ui, -apple-system, Segoe UI, Roboto; color: var(--text);
+      font: 12px/1.3 system-ui; color: var(--text);
       box-shadow: 0 12px 24px rgba(0,0,0,.35); backdrop-filter: blur(8px);
     }
     .status.ok { border-color: color-mix(in oklab, var(--glass-br), var(--ok) 40%); }
     .status.warn { border-color: color-mix(in oklab, var(--glass-br), var(--warn) 40%); }
     .status.err { border-color: color-mix(in oklab, var(--glass-br), var(--err) 40%); }
 
-    /* Settings floating button */
+    /* Settings button */
     .settings-btn {
       position: fixed;
       left: calc(env(safe-area-inset-left, 0px) + 12px);
@@ -92,26 +92,16 @@
     .settings-btn svg { width: 18px; height: 18px; display:block; }
 
     /* Bottom sheet */
-    .sheet {
-      position: fixed; inset: 0; z-index: 3500;
-      background: rgba(0,0,0,.25);
-      backdrop-filter: blur(4px);
-      display:none; opacity:0;
-      transition: opacity .18s ease;
-    }
+    .sheet { position: fixed; inset: 0; z-index: 3500; background: rgba(0,0,0,.25); backdrop-filter: blur(4px); display:none; opacity:0; transition: opacity .18s ease; }
     .sheet.show { display:block; opacity:1; }
     .sheet-card {
       position: absolute;
       left: max(8px, env(safe-area-inset-left, 0px) + 8px);
       right: max(8px, env(safe-area-inset-right, 0px) + 8px);
       bottom: max(8px, env(safe-area-inset-bottom, 0px) + 8px);
-      margin: 0 auto;
-      width: min(720px, 96vw);
-      background: var(--glass-bg); color: var(--text);
-      border: 1px solid var(--glass-br);
-      border-radius: 16px;
-      box-shadow: 0 24px 60px rgba(0,0,0,.45);
-      overflow: hidden;
+      width: min(720px, 96vw); margin: 0 auto;
+      background: var(--glass-bg); color: var(--text); border: 1px solid var(--glass-br);
+      border-radius: 16px; box-shadow: 0 24px 60px rgba(0,0,0,.45); overflow: hidden;
     }
     .sheet-head { display:flex; align-items:center; gap:10px; padding: 12px 14px; border-bottom: 1px solid var(--glass-br); }
     .sheet-head .title { font: 900 14px/1 system-ui; letter-spacing:.2px; }
@@ -119,53 +109,23 @@
     .section { padding: 12px 14px; display:grid; gap:10px; }
     .section h3 { margin:0; font: 800 12px/1.1 system-ui; color: var(--muted); letter-spacing:.4px; text-transform: uppercase; }
     .row { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }
-    .btn {
-      appearance: none; border: 1.6px solid var(--btn-br); background: var(--btn-bg); color: var(--text);
-      height: 36px; padding: 0 10px; border-radius: 999px; font: 700 12px/1 system-ui;
-      display:inline-grid; grid-auto-flow:column; align-items:center; gap:6px; cursor:pointer; -webkit-tap-highlight-color: transparent;
-    }
+    .btn { appearance: none; border: 1.6px solid var(--btn-br); background: var(--btn-bg); color: var(--text); height: 36px; padding: 0 10px; border-radius: 999px; font: 700 12px/1 system-ui; display:inline-grid; grid-auto-flow:column; align-items:center; gap:6px; cursor:pointer; -webkit-tap-highlight-color: transparent; }
     .btn svg { width: 14px; height:14px; }
-    .chip {
-      border: 1.4px solid var(--btn-br); background: transparent; color: var(--text);
-      height: 30px; padding: 0 10px; border-radius: 999px; font: 700 12px/1 system-ui; cursor:pointer;
-    }
+    .chip { border: 1.4px solid var(--btn-br); background: transparent; color: var(--text); height: 30px; padding: 0 10px; border-radius: 999px; font: 700 12px/1 system-ui; cursor:pointer; }
     .chip.active { background: var(--btn-bg); }
     /* Switch */
     .switch { display:flex; align-items:center; gap:10px; }
     .switch input { position: absolute; opacity: 0; pointer-events:none; }
-    .toggle {
-      width: 46px; height: 26px; border-radius: 999px; border:1px solid var(--glass-br);
-      background: rgba(255,255,255,.12); position: relative;
-    }
-    .toggle::after {
-      content:''; position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:999px;
-      background: #fff; box-shadow:0 2px 6px rgba(0,0,0,.25);
-      transition: transform .18s ease;
-    }
+    .toggle { width: 46px; height: 26px; border-radius: 999px; border:1px solid var(--glass-br); background: rgba(255,255,255,.12); position: relative; }
+    .toggle::after { content:''; position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:999px; background: #fff; box-shadow:0 2px 6px rgba(0,0,0,.25); transition: transform .18s ease; }
     .switch input:checked + .toggle { background: rgba(16,185,129,.5); }
     .switch input:checked + .toggle::after { transform: translateX(20px); }
-    .muted { color: var(--muted); font: 12px/1.1 system-ui; }
-    .divider { height:1px; background: var(--glass-br); margin: 8px 0; }
 
     /* Marker chips */
     .chip-marker { transform: translate(-50%, -34px); }
     .chip-marker > div { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--chip-bg); color: var(--text); font: 700 12px/1 system-ui; border: 1.5px solid var(--chip-br); box-shadow: 0 10px 22px rgba(0,0,0,.28); white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px; backdrop-filter: blur(8px) saturate(1.1); }
     .chip-marker.ov > div { opacity: .95; }
     .hidden { display: none !important; }
-
-    /* FAB (optional quick action stays) */
-    .fab {
-      position: fixed;
-      right: calc(env(safe-area-inset-right, 0px) + 14px);
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-      z-index: 3000;
-      width: 56px; height: 56px; border-radius: 18px;
-      display: grid; place-items: center;
-      background: linear-gradient(180deg, #1f2937, #0f172a); color: #fff; font: 900 12px/1 system-ui;
-      border: 1.6px solid var(--btn-br); box-shadow: 0 16px 28px rgba(0,0,0,.4);
-      -webkit-tap-highlight-color: transparent; touch-action: manipulation; cursor:pointer;
-    }
-    .fab svg { width: 20px; height: 20px; display:block; }
   </style>
 </head>
 <body>
@@ -182,7 +142,7 @@
 
   <div id="map"></div>
 
-  <!-- Settings floating button -->
+  <!-- Settings button -->
   <button id="openSettings" class="settings-btn" title="Einstellungen">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/>
@@ -190,7 +150,7 @@
     </svg>
   </button>
 
-  <!-- Bottom sheet with all actions -->
+  <!-- Bottom sheet -->
   <div id="sheet" class="sheet" aria-hidden="true">
     <div class="sheet-card">
       <div class="sheet-head">
@@ -204,12 +164,12 @@
         <div class="row">
           <button class="btn" id="fit"><svg viewBox="0 0 24 24"><path d="M3 3h7M3 3v7M21 3h-7M21 3v7M3 21h7M3 21v-7M21 21h-7M21 21v-7" stroke="currentColor" stroke-width="2" fill="none"/></svg>Zentrieren</button>
           <button class="btn" id="locate"><svg viewBox="0 0 24 24"><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Ortung</button>
+          <button class="btn" id="nowWeather"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" fill="none"/></svg>Jetzt‑Wetter</button>
           <button class="btn" id="share"><svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" stroke="currentColor" stroke-width="2" fill="none"/><path d="M16 6l-4-4-4 4M12 2v14" stroke="currentColor" stroke-width="2" fill="none"/></svg>Teilen</button>
         </div>
       </div>
-      <div class="divider"></div>
       <div class="section">
-        <h3>Wetter-Modus</h3>
+        <h3>Wetter‑Modus</h3>
         <div class="row">
           <button class="chip" id="modeToday">Heute</button>
           <button class="chip" id="modeTomorrow">Morgen</button>
@@ -217,7 +177,6 @@
         </div>
         <div class="muted">Gilt für Popups (Tippen auf Orte / Standort).</div>
       </div>
-      <div class="divider"></div>
       <div class="section">
         <h3>Verlauf & Sharing</h3>
         <div class="row">
@@ -230,39 +189,23 @@
         </div>
         <div class="muted">Export lädt <code>history.json</code> herunter. Publish schreibt diese Datei ins Repo (<code>history/history.json</code>).</div>
       </div>
-      <div class="divider"></div>
       <div class="section">
         <button class="btn" id="closeSheet2"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" fill="none"/></svg>Schließen</button>
       </div>
     </div>
   </div>
 
-  <!-- Optional quick action: Now -->
-  <button class="fab" id="fabNow" title="Jetzt-Wetter" aria-label="Jetzt-Wetter">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="12" cy="12" r="9"/>
-      <path d="M12 7v5l3 3"/>
-    </svg>
-  </button>
-
   <div class="status" id="status">Karte lädt …</div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
-    // Utilities
     function setStatus(msg, cls){ var s = document.getElementById('status'); s.textContent = msg; s.className = 'status '+(cls||''); s.style.display='block'; clearTimeout(s._t); s._t = setTimeout(function(){ s.style.display='none'; }, 2400); }
     function cssVar(name, fallback){ var v = getComputedStyle(document.documentElement).getPropertyValue(name); v = v ? v.trim() : ''; return v || fallback; }
     function haptic(){ if (navigator.vibrate) try{ navigator.vibrate(10); }catch(e){} }
 
-    // Service worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', async function() {
-        try { const reg = await navigator.serviceWorker.register('./sw.js'); setTimeout(()=>reg.update().catch(()=>{}), 1500); } catch(e){ console.warn('SW reg fail', e); }
-      });
-    }
+    if ('serviceWorker' in navigator) { window.addEventListener('load', async function() { try { const reg = await navigator.serviceWorker.register('./sw.js'); setTimeout(()=>reg.update().catch(()=>{}), 1500); } catch(e){ console.warn('SW reg fail', e); } }); }
 
-    // Map & tiles
     const lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {maxZoom:19, attribution:'&copy; OSM & CARTO'});
     const darkTiles  = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  {maxZoom:19, attribution:'&copy; OSM & CARTO'});
     const map = L.map('map');
@@ -273,20 +216,15 @@
     window.addEventListener('load', function(){ setTimeout(function(){ map.invalidateSize(); }, 150); });
     if (mq) { const handler = (e) => { map.removeLayer(lightTiles); map.removeLayer(darkTiles); map.addLayer(e.matches ? darkTiles : lightTiles); }; (mq.addEventListener ? mq.addEventListener('change', handler) : mq.addListener(handler)); }
 
-    // Splash control
-    var splash = document.getElementById('splash');
-    var splashT0 = Date.now(); var mapReady = false, routeReady = false;
-    function hideSplashSoon(){ var elapsed = Date.now() - splashT0; var minDelay = 600; var target = Math.max(0, minDelay - elapsed);
-      setTimeout(function(){ if (splash && !splash.classList.contains('hide')) splash.classList.add('hide'); }, target);
-    }
+    var splash = document.getElementById('splash'); var splashT0 = Date.now(); var mapReady = false, routeReady = false;
+    function hideSplashSoon(){ var elapsed = Date.now() - splashT0; var minDelay = 600; var target = Math.max(0, minDelay - elapsed); setTimeout(function(){ if (splash && !splash.classList.contains('hide')) splash.classList.add('hide'); }, target); }
     function maybeHideSplash(){ if ((mapReady && routeReady) || (Date.now()-splashT0)>2400) hideSplashSoon(); }
     activeTiles.on('load', function(){ mapReady = true; maybeHideSplash(); });
 
-    // Network status
     function showNetStatus(){ setStatus(navigator.onLine ? 'Online' : 'Offline – Cache aktiv', navigator.onLine ? 'ok' : 'warn'); }
     window.addEventListener('online', showNetStatus); window.addEventListener('offline', showNetStatus); showNetStatus();
 
-    // Settings sheet control
+    // Sheet
     const sheet = document.getElementById('sheet');
     function openSheet(){ sheet.classList.add('show'); sheet.setAttribute('aria-hidden', 'false'); haptic(); }
     function closeSheet(){ sheet.classList.remove('show'); sheet.setAttribute('aria-hidden', 'true'); }
@@ -295,7 +233,7 @@
     document.getElementById('closeSheet2').addEventListener('click', closeSheet);
     sheet.addEventListener('click', function(e){ if (e.target === sheet) closeSheet(); });
 
-    // Mode persistence
+    // Mode
     var modeBtns = { today: document.getElementById('modeToday'), tomorrow: document.getElementById('modeTomorrow'), dayAfter: document.getElementById('modeDayAfter') };
     var mode = 'today';
     function applyModeUI(){ for (var k in modeBtns){ modeBtns[k].classList.toggle('active', (k===mode)); } }
@@ -432,7 +370,7 @@
       } catch(err){ console.warn('Geo-Error', err); showGeoError(err); setTimeout(function(){ status.style.display='none'; }, 2400); }
     }
 
-    // Snapshots / Publish
+    // Snapshot / Publish
     const SNAP_KEY = 'mw-snaps-v1'; let snapData = []; let snapsLayer = L.layerGroup().addTo(map);
     let autoLogEnabled = true; let autoPublishEnabled = false; const MIN_INTERVAL_HOURS = 3;
     function loadSnaps(){ try { snapData = JSON.parse(localStorage.getItem(SNAP_KEY) || '[]'); } catch(e){ snapData=[]; } }
@@ -485,7 +423,6 @@
       try { setStatus('Veröffentliche …'); const sha = await getFileSha(cfg.owner, cfg.repo, cfg.branch, path, cfg.token); const res = await putFile(cfg.owner, cfg.repo, cfg.branch, path, cfg.token, buildHistoryJSON(), message, sha); setStatus('Veröffentlicht ✓', 'ok'); return res; } catch(e){ console.error(e); alert('Publish fehlgeschlagen:\n'+e.message); setStatus('Publish fehlgeschlagen', 'err'); throw e; }
     }
 
-    // Published history
     async function loadPublishedHistory(){
       try { const res = await fetch('history/history.json', { cache: 'no-cache' }); if (!res.ok) throw new Error(res.status); const data = await res.json();
         const features = data.features || []; const histLayer = L.layerGroup().addTo(map);
@@ -496,42 +433,24 @@
       } catch(e){ console.log('Keine veröffentlichte History gefunden.'); }
     }
 
-    // Fit route helper
-    function fitRoute(){ var b = routeBounds || L.latLngBounds(latlngs); map.fitBounds(b, { padding: [24,24] }); setStatus('Route zentriert.', 'ok'); }
-
-    // Wire sheet buttons
+    // Controls
     document.getElementById('fit').addEventListener('click', function(){ fitRoute(); haptic(); });
     document.getElementById('locate').addEventListener('click', function(){ locateMe(true, true); haptic(); });
+    document.getElementById('nowWeather').addEventListener('click', function(){ locateMe(true, true); haptic(); });
     document.getElementById('share').addEventListener('click', async function(){ haptic(); const url = location.href; if (navigator.share) { try { await navigator.share({ title: document.title, url: url }); } catch(e){} } else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } } });
 
-    // Quick action
-    document.getElementById('fabNow').addEventListener('click', function(){ locateMe(true, true); haptic(); });
-
-    // Toggles state
-    const autoLogEl = document.getElementById('toggleAutoLog');
-    const autoPubEl = document.getElementById('toggleAutoPublish');
-    function loadToggles(){ try { autoLogEnabled = JSON.parse(localStorage.getItem('mw-autolog')||'true'); } catch(e){} try { autoPublishEnabled = JSON.parse(localStorage.getItem('mw-autopub')||'false'); } catch(e){} autoLogEl.checked = !!autoLogEnabled; autoPubEl.checked = !!autoPublishEnabled; }
-    function saveToggles(){ try { localStorage.setItem('mw-autolog', JSON.stringify(!!autoLogEnabled)); } catch(e){} try { localStorage.setItem('mw-autopub', JSON.stringify(!!autoPublishEnabled)); } catch(e){} }
-    autoLogEl.addEventListener('change', function(){ autoLogEnabled = autoLogEl.checked; saveToggles(); setStatus('Auto‑Log '+(autoLogEnabled?'aktiv':'aus'), autoLogEnabled?'ok':'warn'); });
-    autoPubEl.addEventListener('change', function(){ autoPublishEnabled = autoPubEl.checked; saveToggles(); setStatus('Auto‑Publish '+(autoPublishEnabled?'aktiv':'aus'), autoPublishEnabled?'ok':'warn'); });
-
-    // Export/Publish
-    document.getElementById('snapExport').addEventListener('click', function(){ exportSnaps(); });
-    document.getElementById('snapPublish').addEventListener('click', function(){ publishHistory(); });
-
-    // Weather popup bindings for markers
-    async function loadPopupForPoint(p, m){ await loadPopupGeneric(p.name, p.lat, p.lon, m); }
-
-    // Init
+    // Helpers
     var latlngs = points.map(function(p){ return [p.lat, p.lon]; });
     var routeBounds = null; var routeCoords = null;
+    function fitRoute(){ var b = routeBounds || L.latLngBounds(latlngs); map.fitBounds(b, { padding: [24,24] }); setStatus('Route zentriert.', 'ok'); }
+
+    // Init
     (function start(){
-      loadToggles();
       loadSnaps(); drawSnaps();
       loadPublishedHistory();
       fitRoute();
       setMarkerVisibility();
-      setStatus('Tippe „Ortung“, um zu zentrieren');
+      setStatus('Tippe ⚙️ unten links für Aktionen');
       setTimeout(tryAutoSnapshot, 3000);
       setTimeout(function(){ if (!mapReady || !routeReady) maybeHideSplash(); }, 2600);
     })();
