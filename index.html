@@ -35,85 +35,92 @@
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
     #map { width: 100%; height: 100vh; }
 
+    /* Splash / Loading */
+    .splash {
+      position: fixed; inset: 0;
+      padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
+      display: grid; place-items: center;
+      z-index: 4000;
+      background: radial-gradient(1200px 800px at 20% 0%, rgba(96,165,250,.18), transparent 50%),
+                  radial-gradient(1200px 800px at 120% 120%, rgba(192,132,252,.15), transparent 50%),
+                  linear-gradient(180deg, #0f172a, #0b1120);
+      color: #eef2ff;
+    }
+    @media (prefers-color-scheme: light) {
+      .splash { background: linear-gradient(180deg, #ffffff, #f3f4f6); color: #0b0f14; }
+    }
+    .splash-card {
+      width: min(480px, 88vw);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 24px 60px rgba(0,0,0,.45);
+      border-radius: 16px;
+      padding: 18px 18px 16px;
+      backdrop-filter: blur(10px) saturate(1.1);
+      text-align: center;
+    }
+    .logo {
+      width: 64px; height: 64px; margin: 4px auto 8px; border-radius: 14px;
+      display: grid; place-items: center;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.22);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+      font-size: 30px;
+    }
+    .title { font: 900 18px/1.1 system-ui, -apple-system, Segoe UI, Roboto; letter-spacing: .2px; }
+    .subtitle { margin-top: 4px; color: var(--muted); font: 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto; }
+    .progress { margin: 12px auto 8px; width: 100%; height: 8px; border-radius: 999px; background: rgba(255,255,255,.12); overflow: hidden; position: relative; }
+    .progress .bar { position: absolute; left: -40%; top: 0; bottom: 0; width: 40%; border-radius: 999px; background: linear-gradient(90deg, rgba(56,189,248,.1), rgba(56,189,248,.8), rgba(56,189,248,.1)); animation: slide 1.2s infinite cubic-bezier(.4,0,.2,1); }
+    @keyframes slide { 0% { left: -40%; } 100% { left: 100%; } }
+    .tip { margin-top: 6px; font: 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto; opacity: .8; }
+    .splash.hide { opacity: 0; visibility: hidden; transition: opacity .28s ease; }
+
     /* Bottom toolbar */
-    .toolbar {
-      position: absolute; left: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); top: auto;
-      display: grid; gap: 8px; z-index: 1000;
-    }
-    .btn {
-      appearance: none; border: 1.8px solid var(--btn-br); background: var(--btn-bg); color: var(--btn-tx);
-      height: var(--btn-h); padding: 0 var(--btn-pad-x);
-      border-radius: var(--btn-radius); font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      cursor: pointer; box-shadow: 0 8px 18px rgba(0,0,0,.28); -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-      display: inline-grid; grid-auto-flow: column; align-items: center; gap: var(--btn-gap);
-    }
+    .toolbar { position: absolute; left: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); top: auto; display: grid; gap: 8px; z-index: 1000; }
+    .btn { appearance: none; border: 1.8px solid var(--btn-br); background: var(--btn-bg); color: var(--btn-tx); height: var(--btn-h); padding: 0 var(--btn-pad-x); border-radius: var(--btn-radius); font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; cursor: pointer; box-shadow: 0 8px 18px rgba(0,0,0,.28); -webkit-tap-highlight-color: transparent; touch-action: manipulation; display: inline-grid; grid-auto-flow: column; align-items: center; gap: var(--btn-gap); }
     .btn svg { width: 14px; height: 14px; display: block; }
     .segbtns { display:flex; gap:6px; flex-wrap: wrap; max-width: min(88vw, 520px); }
     .btn.active { box-shadow: 0 10px 20px rgba(0,0,0,.34); border-color: rgba(255,255,255,.9); }
     .btn.ghost { background: transparent; backdrop-filter: blur(6px); }
 
-    /* Status toast (moved to top-left, safe-area aware) */
-    .status {
-      position: absolute;
-      top: calc(env(safe-area-inset-top, 0px) + 12px);
-      left: 12px;
-      right: auto;
-      bottom: auto;
-      z-index: 1500;
-      background: var(--glass-bg); border: 1px solid var(--glass-br); border-radius: 12px; padding: 10px 12px;
-      font: 12px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: var(--text);
-      box-shadow: 0 12px 24px rgba(0,0,0,.35); backdrop-filter: blur(8px);
-    }
+    /* Status toast top-left */
+    .status { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 12px); left: 12px; right: auto; bottom: auto; z-index: 1500; background: var(--glass-bg); border: 1px solid var(--glass-br); border-radius: 12px; padding: 10px 12px; font: 12px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: var(--text); box-shadow: 0 12px 24px rgba(0,0,0,.35); backdrop-filter: blur(8px); }
     .status.ok { border-color: color-mix(in oklab, var(--glass-br), var(--ok) 40%); }
     .status.warn { border-color: color-mix(in oklab, var(--glass-br), var(--warn) 40%); }
     .status.err { border-color: color-mix(in oklab, var(--glass-br), var(--err) 40%); }
 
-    /* Marker chips (glass) */
+    /* Marker chips */
     .chip-marker { transform: translate(-50%, -34px); }
-    .chip-marker > div {
-      display: inline-block; padding: 4px 10px; border-radius: 999px;
-      background: var(--chip-bg); color: var(--text);
-      font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      border: 1.5px solid var(--chip-br); box-shadow: 0 10px 22px rgba(0,0,0,.28);
-      white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px;
-      backdrop-filter: blur(8px) saturate(1.1);
-    }
+    .chip-marker > div { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--chip-bg); color: var(--text); font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; border: 1.5px solid var(--chip-br); box-shadow: 0 10px 22px rgba(0,0,0,.28); white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px; backdrop-filter: blur(8px) saturate(1.1); }
     .hidden { display: none !important; }
 
     /* FAB */
-    .fab {
-      position: fixed;
-      right: calc(env(safe-area-inset-right, 0px) + 14px);
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-      z-index: 3000;
-      width: 56px; height: 56px; border-radius: 18px;
-      display: grid; place-items: center;
-      background: linear-gradient(180deg, #1f2937, #0f172a); color: #fff; font: 900 12px/1 system-ui;
-      border: 1.8px solid var(--btn-br); box-shadow: 0 16px 28px rgba(0,0,0,.4);
-      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-    }
+    .fab { position: fixed; right: calc(env(safe-area-inset-right, 0px) + 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); z-index: 3000; width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; background: linear-gradient(180deg, #1f2937, #0f172a); color: #fff; font: 900 12px/1 system-ui; border: 1.8px solid var(--btn-br); box-shadow: 0 16px 28px rgba(0,0,0,.4); -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     .fab svg { width: 20px; height: 20px; display:block; }
 
     .leaflet-control { border-radius: 8px; overflow: hidden; }
-
-    /* Leaflet popups */
-    .leaflet-popup-content-wrapper {
-      background: var(--glass-bg); color: var(--text); border-radius: 14px; border: 1px solid var(--glass-br);
-      box-shadow: 0 16px 32px rgba(0,0,0,.38); backdrop-filter: blur(8px);
-    }
+    .leaflet-popup-content-wrapper { background: var(--glass-bg); color: var(--text); border-radius: 14px; border: 1px solid var(--glass-br); box-shadow: 0 16px 32px rgba(0,0,0,.38); backdrop-filter: blur(8px); }
     .leaflet-popup-tip { background: var(--glass-bg); border: 1px solid var(--glass-br); }
     .leaflet-popup-content { margin: 10px 12px; }
 
-    @media (max-width: 480px) {
-      .toolbar { gap: 6px; }
-    }
+    @media (max-width: 480px) { .toolbar { gap: 6px; } }
   </style>
 </head>
 <body>
+  <!-- Splash / Loading Overlay -->
+  <div id="splash" class="splash" aria-live="polite" aria-busy="true">
+    <div class="splash-card">
+      <div class="logo">🏍️</div>
+      <div class="title">Moto Wetter</div>
+      <div class="subtitle">Route · Wetter · Snapshots</div>
+      <div class="progress"><div class="bar"></div></div>
+      <div class="tip">Tipp: Tippe „Ortung“, um auf dich zu zentrieren</div>
+    </div>
+  </div>
+
   <div id="map"></div>
 
   <div class="toolbar">
-    <!-- Hauptaktionen -->
     <div class="segbtns">
       <button class="btn" id="fit" title="Gesamte Route">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -137,7 +144,6 @@
       </button>
     </div>
 
-    <!-- Wetter-Modus + Tools -->
     <div class="segbtns">
       <button class="btn" id="modeToday">Heute</button>
       <button class="btn" id="modeTomorrow">Morgen</button>
@@ -160,39 +166,51 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
-    // ---- Utilities ----
     function setStatus(msg, cls){ var s = document.getElementById('status'); s.textContent = msg; s.className = 'status '+(cls||''); s.style.display='block'; clearTimeout(s._t); s._t = setTimeout(function(){ s.style.display='none'; }, 2400); }
     function cssVar(name, fallback){ var v = getComputedStyle(document.documentElement).getPropertyValue(name); v = v ? v.trim() : ''; return v || fallback; }
     function haptic(){ if (navigator.vibrate) try{ navigator.vibrate(10); }catch(e){} }
 
-    // ---- SW register ----
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async function() {
         try { const reg = await navigator.serviceWorker.register('./sw.js'); setTimeout(()=>reg.update().catch(()=>{}), 1500); } catch(e){ console.warn('SW reg fail', e); }
       });
     }
 
-    // ---- Basemap (light/dark auto) ----
     const lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {maxZoom:19, attribution:'&copy; OSM & CARTO'});
     const darkTiles  = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  {maxZoom:19, attribution:'&copy; OSM & CARTO'});
     const map = L.map('map');
     const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
     const isDark = mq && mq.matches;
-    map.addLayer(isDark ? darkTiles : lightTiles);
+    const activeTiles = (isDark ? darkTiles : lightTiles);
+    map.addLayer(activeTiles);
     window.addEventListener('load', function(){ setTimeout(function(){ map.invalidateSize(); }, 150); });
     if (mq) { const handler = (e) => { map.removeLayer(lightTiles); map.removeLayer(darkTiles); map.addLayer(e.matches ? darkTiles : lightTiles); }; (mq.addEventListener ? mq.addEventListener('change', handler) : mq.addListener(handler)); }
 
-    // ---- Online/offline note ----
+    // ---- Splash control ----
+    var splash = document.getElementById('splash');
+    var splashT0 = Date.now();
+    var mapReady = false, routeReady = false;
+    function hideSplashSoon(){
+      var elapsed = Date.now() - splashT0;
+      var minDelay = 600;
+      var target = Math.max(0, minDelay - elapsed);
+      setTimeout(function(){
+        if (splash && !splash.classList.contains('hide')) splash.classList.add('hide');
+      }, target);
+    }
+    function maybeHideSplash(){
+      if ((mapReady && routeReady) || (Date.now()-splashT0)>2400) hideSplashSoon();
+    }
+    activeTiles.on('load', function(){ mapReady = true; maybeHideSplash(); });
+
     function showNetStatus(){ setStatus(navigator.onLine ? 'Online' : 'Offline – Cache aktiv', navigator.onLine ? 'ok' : 'warn'); }
     window.addEventListener('online', showNetStatus); window.addEventListener('offline', showNetStatus); showNetStatus();
 
-    // ---- Buttons ----
     document.getElementById('fit').addEventListener('click', function(){ fitRoute(); haptic(); });
     document.getElementById('locate').addEventListener('click', function(){ locateMe(true, true); haptic(); });
     document.getElementById('fabNow').addEventListener('click', function(){ locateMe(true, true); haptic(); });
     document.getElementById('share').addEventListener('click', async function(){ haptic(); const url = location.href; if (navigator.share) { try { await navigator.share({ title: document.title, url: url }); } catch(e){} } else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } } });
 
-    // ---- Mode (persist) ----
     var modeBtns = { today: document.getElementById('modeToday'), tomorrow: document.getElementById('modeTomorrow'), dayAfter: document.getElementById('modeDayAfter') };
     var mode = 'today';
     function applyModeUI() { for (var k in modeBtns) modeBtns[k].classList.toggle('active', (k===mode)); }
@@ -203,7 +221,6 @@
     modeBtns.tomorrow.addEventListener('click', function(){ setMode('tomorrow', true); haptic(); });
     modeBtns.dayAfter.addEventListener('click', function(){ setMode('dayAfter', true); haptic(); });
 
-    // ---- Route points ----
     const points = [
       { name: "Grosshöchstetten (CH)", lat: 46.906, lon: 7.638 },
       { name: "Interlaken (CH)",       lat: 46.686, lon: 7.863 },
@@ -225,7 +242,6 @@
     ];
     function stripCountry(s){ return s.replace(/\s*\([A-Z]{2}\)\s*$/, ''); }
 
-    // ---- Markers with declutter ----
     var markers = [];
     points.forEach(function(p){
       var m = L.marker([p.lat, p.lon], { icon: L.divIcon({ className:'chip-marker', html:'<div>'+stripCountry(p.name)+'</div>', iconSize:[10,10], iconAnchor:[10,24], popupAnchor:[0,-20] })}).addTo(map);
@@ -235,14 +251,12 @@
     function setMarkerVisibility(){ const z = map.getZoom(); markers.forEach(({marker}) => { const el = marker.getElement(); if (!el) return; if (z >= 7) el.classList.remove('hidden'); else el.classList.add('hidden'); }); }
     map.on('zoomend', setMarkerVisibility); setTimeout(setMarkerVisibility, 400);
 
-    // ---- Fallback polyline ----
     var latlngs = points.map(function(p){ return [p.lat, p.lon]; });
     var fallbackGroup = L.layerGroup().addTo(map);
     L.polyline(latlngs, { color: '#ffffff', weight: 8, opacity: .95, dashArray: '8 10' }).addTo(fallbackGroup);
     L.polyline(latlngs, { color: '#6b7280', weight: 4, opacity: .95, dashArray: '8 10' }).addTo(fallbackGroup);
     map.fitBounds(L.latLngBounds(latlngs), { padding: [24,24] });
 
-    // ---- Route drawing ----
     var routeGroup = L.layerGroup().addTo(map);
     var routeBounds = null; var routeCoords = null;
     function drawCased(coords, color, outline){
@@ -250,7 +264,6 @@
       L.polyline(coords, { color: color, weight: 6, opacity: 1.0 }).addTo(routeGroup);
     }
 
-    // ---- GPX support ----
     const GPX_FILES = [
       'gpx/stegra_route_tag_1.gpx','gpx/stegra_route_tag_2.gpx','gpx/stegra_route_tag_3.gpx',
       'gpx/stegra_route_tag_4.gpx','gpx/stegra_route_tag_5_1.gpx','gpx/stegra_route_tag_5_2.gpx'
@@ -274,10 +287,11 @@
       routeGroup.clearLayers(); drawCased(merged, cssVar('--route','#6b705c'));
       routeCoords = merged; routeBounds = L.latLngBounds(merged);
       map.removeLayer(fallbackGroup); map.fitBounds(routeBounds, { padding: [24,24] });
-      setStatus('GPX-Route geladen ('+merged.length+' Punkte).', 'ok'); return true;
+      setStatus('GPX-Route geladen ('+merged.length+' Punkte).', 'ok');
+      routeReady = true; maybeHideSplash();
+      return true;
     }
 
-    // ---- OSRM fallback ----
     function decodePolyline6(str){
       var index = 0, lat = 0, lon = 0, coords = []; var factor = 1e-6;
       while (index < str.length) {
@@ -299,11 +313,11 @@
         drawCased(coords, cssVar('--route','#6b705c')); routeCoords = coords; routeBounds = L.latLngBounds(coords);
         map.removeLayer(fallbackGroup); setStatus('OSRM-Route geladen.', 'ok');
       } catch(e){ console.warn('OSRM Problem', e); setStatus('Zeige Fallback (Straßenroute nicht geladen).', 'warn'); }
+      routeReady = true; maybeHideSplash();
     })();
 
-    // ---- Wetter / Popups ----
     function windyLink(lat, lon){ var z=8; return 'https://www.windy.com/'+lat.toFixed(3)+'/'+lon.toFixed(3)+'?'+lat.toFixed(3)+','+lon.toFixed(3)+','+z; }
-    var codeMap = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",85:"Schneeschauer 🌨️",86:"Starke Schneeschauer 🌨️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"};
+    var codeMap = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"};
     function fmt(n, unit){ return (n==null || isNaN(n)) ? '-' : (Math.round(n)+(unit||'')); }
     async function loadPopupForPoint(p, marker) { await loadPopupGeneric(p.name, p.lat, p.lon, marker); }
     async function loadPopupGeneric(label, lat, lon, marker) {
@@ -331,7 +345,6 @@
       } catch(e) { marker.bindPopup('<div><strong>'+label+'</strong><br/><span style="color:var(--muted);">Wetter gerade nicht erreichbar.</span></div>').openPopup(); }
     }
 
-    // ---- Geolocation (hotfix) ----
     var meMarker = null; var lastMe = null;
     function showGeoError(err){
       var msg = 'Standortfehler';
@@ -394,7 +407,6 @@
       }
     }
 
-    // ---- Snapshots / Publish ----
     const SNAP_KEY = 'mw-snaps-v1';
     let snapData = []; let snapsLayer = L.layerGroup().addTo(map);
     let autoLogEnabled = true; let autoPublishEnabled = false; const MIN_INTERVAL_HOURS = 3;
@@ -490,7 +502,6 @@
       } catch(e){ console.error(e); alert('Publish fehlgeschlagen:\n'+e.message); setStatus('Publish fehlgeschlagen', 'err'); throw e; }
     }
 
-    // ---- Published history viewer ----
     async function loadPublishedHistory(){
       try {
         const res = await fetch('history/history.json', { cache: 'no-cache' });
@@ -516,7 +527,6 @@
       } catch(e){ console.log('Keine veröffentlichte History gefunden.'); }
     }
 
-    // ---- Init ----
     var latlngs = points.map(function(p){ return [p.lat, p.lon]; });
     var routeBounds = null; var routeCoords = null;
     function fitRoute(){ var b = routeBounds || L.latLngBounds(latlngs); map.fitBounds(b, { padding: [24,24] }); setStatus('Route zentriert.', 'ok'); }
@@ -527,6 +537,7 @@
       fitRoute();
       setStatus('Tippe „Ortung“, um zu zentrieren');
       setTimeout(tryAutoSnapshot, 3000);
+      setTimeout(maybeHideSplash, 2600);
     })();
   </script>
 </body>
