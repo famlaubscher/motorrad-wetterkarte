@@ -83,7 +83,7 @@
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
     // ---- Utilities ----
-    function setStatus(msg, cls){ var s = document.getElementById('status'); s.textContent = msg; s.className = 'status '+(cls||''); s.style.display='block'; clearTimeout(s._t); s._t = setTimeout(function(){ s.style.display='none'; }, 2200); }
+    function setStatus(msg, cls){ var s = document.getElementById('status'); s.textContent = msg; s.className = 'status '+(cls||''); s.style.display='block'; clearTimeout(s._t); s._t = setTimeout(function(){ s.style.display='none'; }, 2400); }
     function cssVar(name, fallback){ var v = getComputedStyle(document.documentElement).getPropertyValue(name); v = v ? v.trim() : ''; return v || fallback; }
     function haptic(){ if (navigator.vibrate) try{ navigator.vibrate(10); }catch(e){} }
 
@@ -102,10 +102,7 @@
     const isDark = mq && mq.matches;
     map.addLayer(isDark ? darkTiles : lightTiles);
     window.addEventListener('load', function(){ setTimeout(function(){ map.invalidateSize(); }, 150); });
-    if (mq) {
-      const handler = (e) => { map.removeLayer(lightTiles); map.removeLayer(darkTiles); map.addLayer(e.matches ? darkTiles : lightTiles); };
-      (mq.addEventListener ? mq.addEventListener('change', handler) : mq.addListener(handler));
-    }
+    if (mq) { const handler = (e) => { map.removeLayer(lightTiles); map.removeLayer(darkTiles); map.addLayer(e.matches ? darkTiles : lightTiles); }; (mq.addEventListener ? mq.addEventListener('change', handler) : mq.addListener(handler)); }
 
     // ---- Online/offline note ----
     function showNetStatus(){ setStatus(navigator.onLine ? 'Online' : 'Offline – Cache aktiv', navigator.onLine ? 'ok' : 'warn'); }
@@ -113,14 +110,9 @@
 
     // ---- Buttons ----
     document.getElementById('fit').addEventListener('click', function(){ fitRoute(); haptic(); });
-    document.getElementById('locate').addEventListener('click', function(){ locateMe(true); haptic(); });
+    document.getElementById('locate').addEventListener('click', function(){ locateMe(true, true); haptic(); });
     document.getElementById('fabNow').addEventListener('click', function(){ locateMe(true, true); haptic(); });
-    document.getElementById('share').addEventListener('click', async function(){
-      haptic();
-      const url = location.href;
-      if (navigator.share) { try { await navigator.share({ title: document.title, url: url }); } catch(e){} }
-      else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } }
-    });
+    document.getElementById('share').addEventListener('click', async function(){ haptic(); const url = location.href; if (navigator.share) { try { await navigator.share({ title: document.title, url: url }); } catch(e){} } else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } } });
 
     // ---- Mode (persist) ----
     var modeBtns = { today: document.getElementById('modeToday'), tomorrow: document.getElementById('modeTomorrow'), dayAfter: document.getElementById('modeDayAfter') };
@@ -258,20 +250,18 @@
           '<a href="'+windyLink(lat, lon)+'" target="_blank" rel="noopener">Details auf Windy öffnen</a>' +
         '</div>';
         marker.bindPopup(html).openPopup();
-      } catch(e) {
-        marker.bindPopup('<div><strong>'+label+'</strong><br/><span style="color:var(--muted);">Wetter gerade nicht erreichbar.</span></div>').openPopup();
-      }
+      } catch(e) { marker.bindPopup('<div><strong>'+label+'</strong><br/><span style="color:var(--muted);">Wetter gerade nicht erreichbar.</span></div>').openPopup(); }
     }
 
-    // ---- Geolocation helpers (robust for iOS PWAs) ----
+    // ---- Geolocation (hotfix) ----
     var meMarker = null; var lastMe = null;
 
     function showGeoError(err){
       var msg = 'Standortfehler';
       if (!err) msg = 'Standortfehler (unbekannt)';
-      else if (err.code === 1) msg = 'Ortung abgelehnt – erlauben in: Einstellungen ▸ Datenschutz ▸ Ortungsdienste ▸ „Moto Wetter“ ▸ Beim Verwenden + Genauer Standort';
-      else if (err.code === 2) msg = 'Ortung nicht verfügbar (kein Fix) – bitte Mobilfunk/GPS aktivieren, freie Sicht, kurz warten';
-      else if (err.code === 3) msg = 'Ortung Timeout – nochmals versuchen';
+      else if (err.code === 1) msg = 'Ortung abgelehnt – Einstellungen ▸ Datenschutz ▸ Ortungsdienste ▸ „Moto Wetter“ ▸ Beim Verwenden + Genauer Standort';
+      else if (err.code === 2) msg = 'Ortung nicht verfügbar – GPS/Mobilfunk aktivieren, freie Sicht und erneut versuchen';
+      else if (err.code === 3) msg = 'Ortung Timeout – nochmals tippen';
       else msg = 'Ortung: '+(err.message||'Fehler');
       setStatus(msg, 'warn');
     }
@@ -292,65 +282,49 @@
       }
     }
 
-    function requestGeoOnce(opts){
-      opts = Object.assign({enableHighAccuracy:true, timeout:8000, maximumAge:0}, opts||{});
+    function requestGeoOnceWithWatchFallback(opts){
+      opts = Object.assign({enableHighAccuracy:true, timeout:10000, maximumAge:60000}, opts||{});
       return new Promise((resolve, reject) => {
         if (!navigator.geolocation) { reject({code:2, message:'Geolocation nicht verfügbar'}); return; }
         let settled = false;
-        // Primary: getCurrentPosition
-        navigator.geolocation.getCurrentPosition(
-          pos => { if (settled) return; settled = true; resolve(pos); },
-          err => {
-            // Fallback: quick watchPosition
-            if (settled) return;
-            let watchId = null;
-            const onWatch = (p) => { if (settled) return; settled = true; try{ navigator.geolocation.clearWatch(watchId);}catch(e){} resolve(p); };
-            try { watchId = navigator.geolocation.watchPosition(onWatch, e => {}, { enableHighAccuracy:true, maximumAge:0, timeout:12000 }); } catch(e){}
-            setTimeout(() => {
-              if (settled) return;
-              try{ navigator.geolocation.clearWatch(watchId);}catch(e){}
-              reject(err || {code:3, message:'Timeout'});
-            }, 12000);
-          },
-          opts
-        );
+        const clear = (id)=>{ try{ navigator.geolocation.clearWatch(id);}catch(e){} };
+        const onSuccess = (pos)=>{ if (settled) return; settled = true; clear(watchId); resolve(pos); };
+        const onError   = (err)=>{
+          // start watch fallback only once
+          if (settled) return;
+          // If denied, don't start watch; reject immediately
+          if (err && err.code === 1) { settled = true; reject(err); return; }
+          // try watchPosition for a quick fix
+          watchId = navigator.geolocation.watchPosition(
+            p => { if (settled) return; settled = true; clear(watchId); resolve(p); },
+            e => {},
+            { enableHighAccuracy:true, maximumAge:60000, timeout:12000 }
+          );
+          setTimeout(()=>{ if (!settled) { settled = true; clear(watchId); reject(err||{code:3, message:'Timeout'}); } }, 13000);
+        };
+        let watchId = -1;
+        try { navigator.geolocation.getCurrentPosition(onSuccess, onError, opts); }
+        catch(e){ reject(e); }
       });
     }
 
-    async function locateMe(userAction, recenter){
+    async function locateMe(userTap, recenter){
       const status = document.getElementById('status');
       status.style.display='block'; status.textContent = 'Bestimme deinen Standort …';
       try {
-        // If browser supports Permissions API, hint user proactively
-        if (navigator.permissions && navigator.permissions.query) {
-          try {
-            const st = await navigator.permissions.query({name:'geolocation'});
-            if (st.state === 'denied') {
-              throw {code:1, message:'Permission denied'};
-            }
-          } catch(e){ /* ignore */ }
-        }
-        const pos = await requestGeoOnce({ enableHighAccuracy:true, timeout: 10000, maximumAge: 0 });
+        const pos = await requestGeoOnceWithWatchFallback({ enableHighAccuracy:true, timeout: 10000, maximumAge: 60000 });
         const lat = pos.coords.latitude, lon = pos.coords.longitude;
-        markMe(lat, lon, true);
+        markMe(lat, lon, !!recenter);
         status.textContent = 'Zentriert.'; setTimeout(function(){ status.style.display='none'; }, 1600);
       } catch(err){
         console.warn('Geo-Error', err);
         showGeoError(err);
-        fitRoute();
-        setTimeout(function(){ status.style.display='none'; }, 2000);
+        // WICHTIG: bei Fehler nach Tap NICHT automatisch Route zentrieren – lass die Karte wie sie ist
+        setTimeout(function(){ status.style.display='none'; }, 2400);
       }
     }
 
-    // ---- Auto-refresh Wetter ----
-    setInterval(function(){
-      if (document.visibilityState === 'visible' && lastMe && meMarker) {
-        loadPopupGeneric('Dein Standort', lastMe.lat, lastMe.lon, meMarker);
-        setStatus('Wetter aktualisiert');
-      }
-    }, 20 * 60 * 1000);
-
-    // ---- Snapshot + Publish (unchanged from previous v2) ----
+    // ---- Snapshots / Publish (unverändert) ----
     const SNAP_KEY = 'mw-snaps-v1';
     let snapData = []; let snapsLayer = L.layerGroup().addTo(map);
     let autoLogEnabled = true; let autoPublishEnabled = false; const MIN_INTERVAL_HOURS = 3;
@@ -392,20 +366,8 @@
       loadSnaps();
       const last = lastSnap(); const now = new Date();
       if (last && hoursBetween(new Date(last.t), now) < MIN_INTERVAL_HOURS) { setStatus('Auto‑Log übersprungen'); return; }
-      // Nur Auto-Snapshot, wenn bereits erlaubt (keine neue Abfrage ohne Tap)
-      if (navigator.permissions && navigator.permissions.query) {
-        try {
-          const st = await navigator.permissions.query({name:'geolocation'});
-          if (st.state === 'granted') {
-            locateMe(false);
-          } else {
-            setStatus('Ortung tippen, um Snapshot zu speichern');
-          }
-          return;
-        } catch(e){ /* ignore */ }
-      }
-      // Fallback: nicht automatisch fragen, um iOS nicht zu nerven
-      setStatus('Ortung tippen, um Snapshot zu speichern');
+      // Nur wenn bereits markMe existiert (keine Permission-Abfrage im Hintergrund)
+      if (lastMe) snapshotNow(lastMe.lat, lastMe.lon);
     }
 
     function buildHistoryJSON(){
@@ -505,21 +467,11 @@
     var routeBounds = null; var routeCoords = null;
     function fitRoute(){ var b = routeBounds || L.latLngBounds(latlngs); map.fitBounds(b, { padding: [24,24] }); setStatus('Route zentriert.', 'ok'); }
 
-    (async function start(){
+    (function start(){
       loadSnaps(); drawSnaps();
       loadPublishedHistory();
       fitRoute();
-      // Kein auto-locate ohne Erlaubnis: wir fragen nur, wenn bereits granted
-      try {
-        if (navigator.permissions && navigator.permissions.query) {
-          const st = await navigator.permissions.query({name:'geolocation'});
-          if (st.state === 'granted') locateMe(false);
-          else setStatus('Tippe „Ortung“, um zu zentrieren');
-        } else {
-          setStatus('Tippe „Ortung“, um zu zentrieren');
-        }
-      } catch(e){ setStatus('Tippe „Ortung“, um zu zentrieren'); }
-      // Auto-Snapshot nur bei granted; sonst Hinweis
+      setStatus('Tippe „Ortung“, um zu zentrieren');
       setTimeout(tryAutoSnapshot, 3000);
     })();
   </script>
