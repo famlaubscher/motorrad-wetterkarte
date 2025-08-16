@@ -17,19 +17,17 @@
       --bg: #0b0f14; --text: #e5e7eb; --muted: #9ca3af;
       --chip-bg: rgba(15,23,42,.55); --chip-br: rgba(255,255,255,.18);
       --route: #c3d0df; --route-outline: rgba(0,0,0,.7);
-      --me: #60a5fa; --btn-bg: rgba(15,23,42,.85); --btn-br: rgba(255,255,255,.18); --btn-tx: #e5e7eb;
-      --accent: #111827; --snap:#38bdf8; --hist:#c084fc;
-      --glass-bg: rgba(17,24,39,.8); --glass-br: rgba(255,255,255,.12);
+      --me: #60a5fa; --btn-bg: rgba(15,23,42,.88); --btn-br: rgba(255,255,255,.18); --btn-tx: #e5e7eb;
+      --glass-bg: rgba(17,24,39,.86); --glass-br: rgba(255,255,255,.12);
       --ok:#10b981; --warn:#f59e0b; --err:#ef4444;
-      --btn-h: 36px; --btn-radius: 999px; --btn-gap: 6px; --btn-pad-x: 10px;
     }
     @media (prefers-color-scheme: light) {
       :root {
         --bg:#f8fafc; --text:#111827; --muted:#6b7280;
         --chip-bg: rgba(255,255,255,.75); --chip-br: rgba(0,0,0,.08);
         --route:#6b705c; --route-outline:#ffffff;
-        --btn-bg: rgba(17,24,39,.92); --btn-br: rgba(255,255,255,.85); --btn-tx: #fff;
-        --glass-bg: rgba(255,255,255,.92); --glass-br: rgba(0,0,0,.08);
+        --btn-bg: rgba(17,24,39,.92); --btn-br: rgba(255,255,255,.9); --btn-tx: #fff;
+        --glass-bg: rgba(255,255,255,.95); --glass-br: rgba(0,0,0,.12);
       }
     }
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
@@ -59,56 +57,119 @@
       backdrop-filter: blur(10px) saturate(1.1);
       text-align: center;
     }
-    .logo {
-      width: 64px; height: 64px; margin: 4px auto 8px; border-radius: 14px;
-      display: grid; place-items: center;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.22);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
-      font-size: 30px;
-    }
+    .logo { width: 64px; height: 64px; margin: 4px auto 8px; border-radius: 14px; display: grid; place-items: center; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.22); font-size: 30px; }
     .title { font: 900 18px/1.1 system-ui, -apple-system, Segoe UI, Roboto; letter-spacing: .2px; }
     .subtitle { margin-top: 4px; color: var(--muted); font: 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto; }
     .progress { margin: 12px auto 8px; width: 100%; height: 8px; border-radius: 999px; background: rgba(255,255,255,.12); overflow: hidden; position: relative; }
     .progress .bar { position: absolute; left: -40%; top: 0; bottom: 0; width: 40%; border-radius: 999px; background: linear-gradient(90deg, rgba(56,189,248,.1), rgba(56,189,248,.8), rgba(56,189,248,.1)); animation: slide 1.2s infinite cubic-bezier(.4,0,.2,1); }
     @keyframes slide { 0% { left: -40%; } 100% { left: 100%; } }
-    .tip { margin-top: 6px; font: 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto; opacity: .8; }
+    .tip { margin-top: 6px; font: 12px/1.2 system-ui; opacity: .8; }
     .splash.hide { opacity: 0; visibility: hidden; transition: opacity .28s ease; }
 
-    /* Bottom toolbar */
-    .toolbar { position: absolute; left: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); top: auto; display: grid; gap: 8px; z-index: 1000; }
-    .btn { appearance: none; border: 1.8px solid var(--btn-br); background: var(--btn-bg); color: var(--btn-tx); height: var(--btn-h); padding: 0 var(--btn-pad-x); border-radius: var(--btn-radius); font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; cursor: pointer; box-shadow: 0 8px 18px rgba(0,0,0,.28); -webkit-tap-highlight-color: transparent; touch-action: manipulation; display: inline-grid; grid-auto-flow: column; align-items: center; gap: var(--btn-gap); }
-    .btn svg { width: 14px; height: 14px; display: block; }
-    .segbtns { display:flex; gap:6px; flex-wrap: wrap; max-width: min(88vw, 520px); }
-    .btn.active { box-shadow: 0 10px 20px rgba(0,0,0,.34); border-color: rgba(255,255,255,.9); }
-    .btn.ghost { background: transparent; backdrop-filter: blur(6px); }
-
     /* Status toast top-left */
-    .status { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 12px); left: 12px; right: auto; bottom: auto; z-index: 1500; background: var(--glass-bg); border: 1px solid var(--glass-br); border-radius: 12px; padding: 10px 12px; font: 12px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: var(--text); box-shadow: 0 12px 24px rgba(0,0,0,.35); backdrop-filter: blur(8px); }
+    .status {
+      position: absolute; top: calc(env(safe-area-inset-top, 0px) + 12px); left: 12px; z-index: 1500;
+      background: var(--glass-bg); border: 1px solid var(--glass-br); border-radius: 12px; padding: 10px 12px;
+      font: 12px/1.3 system-ui, -apple-system, Segoe UI, Roboto; color: var(--text);
+      box-shadow: 0 12px 24px rgba(0,0,0,.35); backdrop-filter: blur(8px);
+    }
     .status.ok { border-color: color-mix(in oklab, var(--glass-br), var(--ok) 40%); }
     .status.warn { border-color: color-mix(in oklab, var(--glass-br), var(--warn) 40%); }
     .status.err { border-color: color-mix(in oklab, var(--glass-br), var(--err) 40%); }
 
+    /* Settings floating button */
+    .settings-btn {
+      position: fixed;
+      left: calc(env(safe-area-inset-left, 0px) + 12px);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+      z-index: 3000;
+      width: 44px; height: 44px; border-radius: 14px;
+      display: grid; place-items: center;
+      background: var(--btn-bg); color: var(--text);
+      border: 1.6px solid var(--btn-br); box-shadow: 0 14px 26px rgba(0,0,0,.38);
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation; cursor: pointer;
+    }
+    .settings-btn svg { width: 18px; height: 18px; display:block; }
+
+    /* Bottom sheet */
+    .sheet {
+      position: fixed; inset: 0; z-index: 3500;
+      background: rgba(0,0,0,.25);
+      backdrop-filter: blur(4px);
+      display:none; opacity:0;
+      transition: opacity .18s ease;
+    }
+    .sheet.show { display:block; opacity:1; }
+    .sheet-card {
+      position: absolute;
+      left: max(8px, env(safe-area-inset-left, 0px) + 8px);
+      right: max(8px, env(safe-area-inset-right, 0px) + 8px);
+      bottom: max(8px, env(safe-area-inset-bottom, 0px) + 8px);
+      margin: 0 auto;
+      width: min(720px, 96vw);
+      background: var(--glass-bg); color: var(--text);
+      border: 1px solid var(--glass-br);
+      border-radius: 16px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.45);
+      overflow: hidden;
+    }
+    .sheet-head { display:flex; align-items:center; gap:10px; padding: 12px 14px; border-bottom: 1px solid var(--glass-br); }
+    .sheet-head .title { font: 900 14px/1 system-ui; letter-spacing:.2px; }
+    .xbtn { margin-left:auto; width: 32px; height: 32px; border-radius: 10px; display:grid; place-items:center; border:1px solid var(--glass-br); background: transparent; color: var(--text); }
+    .section { padding: 12px 14px; display:grid; gap:10px; }
+    .section h3 { margin:0; font: 800 12px/1.1 system-ui; color: var(--muted); letter-spacing:.4px; text-transform: uppercase; }
+    .row { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }
+    .btn {
+      appearance: none; border: 1.6px solid var(--btn-br); background: var(--btn-bg); color: var(--text);
+      height: 36px; padding: 0 10px; border-radius: 999px; font: 700 12px/1 system-ui;
+      display:inline-grid; grid-auto-flow:column; align-items:center; gap:6px; cursor:pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .btn svg { width: 14px; height:14px; }
+    .chip {
+      border: 1.4px solid var(--btn-br); background: transparent; color: var(--text);
+      height: 30px; padding: 0 10px; border-radius: 999px; font: 700 12px/1 system-ui; cursor:pointer;
+    }
+    .chip.active { background: var(--btn-bg); }
+    /* Switch */
+    .switch { display:flex; align-items:center; gap:10px; }
+    .switch input { position: absolute; opacity: 0; pointer-events:none; }
+    .toggle {
+      width: 46px; height: 26px; border-radius: 999px; border:1px solid var(--glass-br);
+      background: rgba(255,255,255,.12); position: relative;
+    }
+    .toggle::after {
+      content:''; position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:999px;
+      background: #fff; box-shadow:0 2px 6px rgba(0,0,0,.25);
+      transition: transform .18s ease;
+    }
+    .switch input:checked + .toggle { background: rgba(16,185,129,.5); }
+    .switch input:checked + .toggle::after { transform: translateX(20px); }
+    .muted { color: var(--muted); font: 12px/1.1 system-ui; }
+    .divider { height:1px; background: var(--glass-br); margin: 8px 0; }
+
     /* Marker chips */
     .chip-marker { transform: translate(-50%, -34px); }
-    .chip-marker > div { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--chip-bg); color: var(--text); font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; border: 1.5px solid var(--chip-br); box-shadow: 0 10px 22px rgba(0,0,0,.28); white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px; backdrop-filter: blur(8px) saturate(1.1); }
+    .chip-marker > div { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--chip-bg); color: var(--text); font: 700 12px/1 system-ui; border: 1.5px solid var(--chip-br); box-shadow: 0 10px 22px rgba(0,0,0,.28); white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px; backdrop-filter: blur(8px) saturate(1.1); }
     .chip-marker.ov > div { opacity: .95; }
     .hidden { display: none !important; }
 
-    /* FAB */
-    .fab { position: fixed; right: calc(env(safe-area-inset-right, 0px) + 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); z-index: 3000; width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; background: linear-gradient(180deg, #1f2937, #0f172a); color: #fff; font: 900 12px/1 system-ui; border: 1.8px solid var(--btn-br); box-shadow: 0 16px 28px rgba(0,0,0,.4); -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    /* FAB (optional quick action stays) */
+    .fab {
+      position: fixed;
+      right: calc(env(safe-area-inset-right, 0px) + 14px);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+      z-index: 3000;
+      width: 56px; height: 56px; border-radius: 18px;
+      display: grid; place-items: center;
+      background: linear-gradient(180deg, #1f2937, #0f172a); color: #fff; font: 900 12px/1 system-ui;
+      border: 1.6px solid var(--btn-br); box-shadow: 0 16px 28px rgba(0,0,0,.4);
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation; cursor:pointer;
+    }
     .fab svg { width: 20px; height: 20px; display:block; }
-
-    .leaflet-control { border-radius: 8px; overflow: hidden; }
-    .leaflet-popup-content-wrapper { background: var(--glass-bg); color: var(--text); border-radius: 14px; border: 1px solid var(--glass-br); box-shadow: 0 16px 32px rgba(0,0,0,.38); backdrop-filter: blur(8px); }
-    .leaflet-popup-tip { background: var(--glass-bg); border: 1px solid var(--glass-br); }
-    .leaflet-popup-content { margin: 10px 12px; }
-
-    @media (max-width: 480px) { .toolbar { gap: 6px; } }
   </style>
 </head>
 <body>
-  <!-- Splash / Loading Overlay -->
+  <!-- Splash -->
   <div id="splash" class="splash" aria-live="polite" aria-busy="true">
     <div class="splash-card">
       <div class="logo">🏍️</div>
@@ -121,65 +182,87 @@
 
   <div id="map"></div>
 
-  <div class="toolbar">
-    <div class="segbtns">
-      <button class="btn" id="fit" title="Gesamte Route">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 3h7M3 3v7M21 3h-7M21 3v7M3 21h7M3 21v-7M21 21h-7M21 21v-7"/>
-        </svg>
-        Zentrieren
-      </button>
-      <button class="btn" id="locate" title="Auf mich zentrieren">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-          <circle cx="12" cy="12" r="5"/>
-        </svg>
-        Ortung
-      </button>
-      <button class="btn" id="share" title="Link teilen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/>
-          <path d="M16 6l-4-4-4 4M12 2v14"/>
-        </svg>
-        Teilen
-      </button>
-    </div>
+  <!-- Settings floating button -->
+  <button id="openSettings" class="settings-btn" title="Einstellungen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.04 4.3l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c0 .66.39 1.26 1 1.51.31.13.64.2.98.2H21a2 2 0 1 1 0 4h-.09c-.34 0-.67.07-.98.2-.61.25-1 .85-1 1.51Z"/>
+    </svg>
+  </button>
 
-    <div class="segbtns">
-      <button class="btn" id="modeToday">Heute</button>
-      <button class="btn" id="modeTomorrow">Morgen</button>
-      <button class="btn" id="modeDayAfter">Übermorgen</button>
-      <button class="btn ghost" id="autoLog">Auto‑Log</button>
-      <button class="btn ghost" id="snapExport">Export</button>
-      <button class="btn ghost" id="snapPublish">Publish</button>
-      <button class="btn ghost" id="autoPublish">Auto‑Pub</button>
+  <!-- Bottom sheet with all actions -->
+  <div id="sheet" class="sheet" aria-hidden="true">
+    <div class="sheet-card">
+      <div class="sheet-head">
+        <div class="title">Einstellungen & Aktionen</div>
+        <button id="closeSheet" class="xbtn" aria-label="Schließen">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+        </button>
+      </div>
+      <div class="section">
+        <h3>Ansicht</h3>
+        <div class="row">
+          <button class="btn" id="fit"><svg viewBox="0 0 24 24"><path d="M3 3h7M3 3v7M21 3h-7M21 3v7M3 21h7M3 21v-7M21 21h-7M21 21v-7" stroke="currentColor" stroke-width="2" fill="none"/></svg>Zentrieren</button>
+          <button class="btn" id="locate"><svg viewBox="0 0 24 24"><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Ortung</button>
+          <button class="btn" id="share"><svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" stroke="currentColor" stroke-width="2" fill="none"/><path d="M16 6l-4-4-4 4M12 2v14" stroke="currentColor" stroke-width="2" fill="none"/></svg>Teilen</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="section">
+        <h3>Wetter-Modus</h3>
+        <div class="row">
+          <button class="chip" id="modeToday">Heute</button>
+          <button class="chip" id="modeTomorrow">Morgen</button>
+          <button class="chip" id="modeDayAfter">Übermorgen</button>
+        </div>
+        <div class="muted">Gilt für Popups (Tippen auf Orte / Standort).</div>
+      </div>
+      <div class="divider"></div>
+      <div class="section">
+        <h3>Verlauf & Sharing</h3>
+        <div class="row">
+          <label class="switch"><input type="checkbox" id="toggleAutoLog"><span class="toggle"></span></label><span>Auto‑Log (alle ~3h beim Öffnen)</span>
+        </div>
+        <div class="row">
+          <button class="btn" id="snapExport"><svg viewBox="0 0 24 24"><path d="M12 2v14m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" fill="none"/></svg>Export</button>
+          <button class="btn" id="snapPublish"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H4zM8 20h8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Publish</button>
+          <label class="switch"><input type="checkbox" id="toggleAutoPublish"><span class="toggle"></span></label><span>Auto‑Publish</span>
+        </div>
+        <div class="muted">Export lädt <code>history.json</code> herunter. Publish schreibt diese Datei ins Repo (<code>history/history.json</code>).</div>
+      </div>
+      <div class="divider"></div>
+      <div class="section">
+        <button class="btn" id="closeSheet2"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M6 18L18 6" stroke="currentColor" stroke-width="2" fill="none"/></svg>Schließen</button>
+      </div>
     </div>
   </div>
 
+  <!-- Optional quick action: Now -->
   <button class="fab" id="fabNow" title="Jetzt-Wetter" aria-label="Jetzt-Wetter">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="9"/>
       <path d="M12 7v5l3 3"/>
     </svg>
   </button>
+
   <div class="status" id="status">Karte lädt …</div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
-    // ---- Utilities ----
+    // Utilities
     function setStatus(msg, cls){ var s = document.getElementById('status'); s.textContent = msg; s.className = 'status '+(cls||''); s.style.display='block'; clearTimeout(s._t); s._t = setTimeout(function(){ s.style.display='none'; }, 2400); }
     function cssVar(name, fallback){ var v = getComputedStyle(document.documentElement).getPropertyValue(name); v = v ? v.trim() : ''; return v || fallback; }
     function haptic(){ if (navigator.vibrate) try{ navigator.vibrate(10); }catch(e){} }
 
-    // ---- SW register ----
+    // Service worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async function() {
         try { const reg = await navigator.serviceWorker.register('./sw.js'); setTimeout(()=>reg.update().catch(()=>{}), 1500); } catch(e){ console.warn('SW reg fail', e); }
       });
     }
 
-    // ---- Basemap (light/dark auto) ----
+    // Map & tiles
     const lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {maxZoom:19, attribution:'&copy; OSM & CARTO'});
     const darkTiles  = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  {maxZoom:19, attribution:'&copy; OSM & CARTO'});
     const map = L.map('map');
@@ -190,37 +273,32 @@
     window.addEventListener('load', function(){ setTimeout(function(){ map.invalidateSize(); }, 150); });
     if (mq) { const handler = (e) => { map.removeLayer(lightTiles); map.removeLayer(darkTiles); map.addLayer(e.matches ? darkTiles : lightTiles); }; (mq.addEventListener ? mq.addEventListener('change', handler) : mq.addListener(handler)); }
 
-    // ---- Splash control ----
+    // Splash control
     var splash = document.getElementById('splash');
-    var splashT0 = Date.now();
-    var mapReady = false, routeReady = false;
-    function hideSplashSoon(){
-      var elapsed = Date.now() - splashT0;
-      var minDelay = 600; // min 0.6s to avoid flash
-      var target = Math.max(0, minDelay - elapsed);
-      setTimeout(function(){
-        if (splash && !splash.classList.contains('hide')) splash.classList.add('hide');
-      }, target);
+    var splashT0 = Date.now(); var mapReady = false, routeReady = false;
+    function hideSplashSoon(){ var elapsed = Date.now() - splashT0; var minDelay = 600; var target = Math.max(0, minDelay - elapsed);
+      setTimeout(function(){ if (splash && !splash.classList.contains('hide')) splash.classList.add('hide'); }, target);
     }
-    function maybeHideSplash(){
-      if ((mapReady && routeReady) || (Date.now()-splashT0)>2400) hideSplashSoon();
-    }
+    function maybeHideSplash(){ if ((mapReady && routeReady) || (Date.now()-splashT0)>2400) hideSplashSoon(); }
     activeTiles.on('load', function(){ mapReady = true; maybeHideSplash(); });
 
-    // ---- Online/offline note ----
+    // Network status
     function showNetStatus(){ setStatus(navigator.onLine ? 'Online' : 'Offline – Cache aktiv', navigator.onLine ? 'ok' : 'warn'); }
     window.addEventListener('online', showNetStatus); window.addEventListener('offline', showNetStatus); showNetStatus();
 
-    // ---- Buttons ----
-    document.getElementById('fit').addEventListener('click', function(){ fitRoute(); haptic(); });
-    document.getElementById('locate').addEventListener('click', function(){ locateMe(true, true); haptic(); });
-    document.getElementById('fabNow').addEventListener('click', function(){ locateMe(true, true); haptic(); });
-    document.getElementById('share').addEventListener('click', async function(){ haptic(); const url = location.href; if (navigator.share) { try { await navigator.share({ title: document.title, url: url }); } catch(e){} } else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } } });
+    // Settings sheet control
+    const sheet = document.getElementById('sheet');
+    function openSheet(){ sheet.classList.add('show'); sheet.setAttribute('aria-hidden', 'false'); haptic(); }
+    function closeSheet(){ sheet.classList.remove('show'); sheet.setAttribute('aria-hidden', 'true'); }
+    document.getElementById('openSettings').addEventListener('click', openSheet);
+    document.getElementById('closeSheet').addEventListener('click', closeSheet);
+    document.getElementById('closeSheet2').addEventListener('click', closeSheet);
+    sheet.addEventListener('click', function(e){ if (e.target === sheet) closeSheet(); });
 
-    // ---- Mode (persist) ----
+    // Mode persistence
     var modeBtns = { today: document.getElementById('modeToday'), tomorrow: document.getElementById('modeTomorrow'), dayAfter: document.getElementById('modeDayAfter') };
     var mode = 'today';
-    function applyModeUI() { for (var k in modeBtns) modeBtns[k].classList.toggle('active', (k===mode)); }
+    function applyModeUI(){ for (var k in modeBtns){ modeBtns[k].classList.toggle('active', (k===mode)); } }
     function setMode(m, persist){ mode=m; applyModeUI(); if (persist) { try { localStorage.setItem('mw-mode', m); } catch(e){} } }
     function smartDefaultMode(){ try { var saved = localStorage.getItem('mw-mode'); if (saved) return saved; } catch(e){}; return (new Date().getHours() >= 16) ? 'tomorrow' : 'today'; }
     setMode(smartDefaultMode(), false);
@@ -228,7 +306,7 @@
     modeBtns.tomorrow.addEventListener('click', function(){ setMode('tomorrow', true); haptic(); });
     modeBtns.dayAfter.addEventListener('click', function(){ setMode('dayAfter', true); haptic(); });
 
-    // ---- Route points ----
+    // Points
     const points = [
       { name: "Grosshöchstetten (CH)", lat: 46.906, lon: 7.638 },
       { name: "Interlaken (CH)",       lat: 46.686, lon: 7.863 },
@@ -250,7 +328,7 @@
     ];
     function stripCountry(s){ return s.replace(/\s*\([A-Z]{2}\)\s*$/, ''); }
 
-    // ---- Markers (detail level) ----
+    // Markers (detail)
     var markers = [];
     points.forEach(function(p){
       var m = L.marker([p.lat, p.lon], { icon: L.divIcon({ className:'chip-marker', html:'<div>'+stripCountry(p.name)+'</div>', iconSize:[10,10], iconAnchor:[10,24], popupAnchor:[0,-20] })}).addTo(map);
@@ -258,152 +336,63 @@
       markers.push({ marker: m, data: p });
     });
 
-    // ---- Overview labels (low zoom, sampled) ----
+    // Overview labels
     var overviewMarkers = [];
-    function sampleIndices(n, k){
-      if (k >= n) return Array.from({length:n}, (_,i)=>i);
-      var idx = []; var step = (n-1)/(k-1);
-      for (var i=0;i<k;i++){ idx.push(Math.round(i*step)); }
-      // Dedup in case of rounding collisions
-      var seen = {}; idx = idx.filter(i => (i>=0 && i<n && !seen[i] && (seen[i]=true)));
-      return idx;
-    }
-    (function buildOverview(){
-      var k = Math.min(7, points.length);
-      var idxs = sampleIndices(points.length, k);
-      idxs.forEach(function(i){
-        var p = points[i];
-        var m = L.marker([p.lat, p.lon], { icon: L.divIcon({ className:'chip-marker ov', html:'<div>'+stripCountry(p.name)+'</div>', iconSize:[10,10], iconAnchor:[10,24], popupAnchor:[0,-20] })}).addTo(map);
-        m.on('click', function(){ m.bindPopup('<div>Lade Wetter…</div>').openPopup(); loadPopupForPoint(p, m); });
-        overviewMarkers.push(m);
-      });
-    })();
-
-    function setMarkerVisibility(){
-      const z = map.getZoom();
-      // Detail markers: only show at z >= 7
-      markers.forEach(({marker}) => {
-        const el = marker.getElement(); if (!el) return;
-        if (z >= 7) el.classList.remove('hidden'); else el.classList.add('hidden');
-      });
-      // Overview markers: only show at z < 7
-      overviewMarkers.forEach((m) => {
-        const el = m.getElement(); if (!el) return;
-        if (z < 7) el.classList.remove('hidden'); else el.classList.add('hidden');
-      });
-    }
+    function sampleIndices(n, k){ if (k >= n) return Array.from({length:n}, (_,i)=>i); var idx = []; var step = (n-1)/(k-1); for (var i=0;i<k;i++){ idx.push(Math.round(i*step)); } var seen = {}; return idx.filter(i => (i>=0 && i<n && !seen[i] && (seen[i]=true))); }
+    (function buildOverview(){ var k = Math.min(7, points.length); var idxs = sampleIndices(points.length, k); idxs.forEach(function(i){ var p = points[i];
+      var m = L.marker([p.lat, p.lon], { icon: L.divIcon({ className:'chip-marker ov', html:'<div>'+stripCountry(p.name)+'</div>', iconSize:[10,10], iconAnchor:[10,24], popupAnchor:[0,-20] })}).addTo(map);
+      m.on('click', function(){ m.bindPopup('<div>Lade Wetter…</div>').openPopup(); loadPopupForPoint(p, m); });
+      overviewMarkers.push(m);
+    }); })();
+    function setMarkerVisibility(){ const z = map.getZoom(); markers.forEach(({marker}) => { const el = marker.getElement(); if (!el) return; if (z >= 7) el.classList.remove('hidden'); else el.classList.add('hidden'); }); overviewMarkers.forEach((m) => { const el = m.getElement(); if (!el) return; if (z < 7) el.classList.remove('hidden'); else el.classList.add('hidden'); }); }
     map.on('zoomend', setMarkerVisibility);
 
-    // ---- Fallback polyline ----
+    // Fallback polyline
     var latlngs = points.map(function(p){ return [p.lat, p.lon]; });
     var fallbackGroup = L.layerGroup().addTo(map);
     L.polyline(latlngs, { color: '#ffffff', weight: 8, opacity: .95, dashArray: '8 10' }).addTo(fallbackGroup);
     L.polyline(latlngs, { color: '#6b7280', weight: 4, opacity: .95, dashArray: '8 10' }).addTo(fallbackGroup);
     map.fitBounds(L.latLngBounds(latlngs), { padding: [24,24] });
 
-    // ---- Route drawing ----
+    // Route drawing
     var routeGroup = L.layerGroup().addTo(map);
     var routeBounds = null; var routeCoords = null;
-    function drawCased(coords, color, outline){
-      L.polyline(coords, { color: outline || cssVar('--route-outline','#ffffff'), weight: 9, opacity: 0.95 }).addTo(routeGroup);
-      L.polyline(coords, { color: color, weight: 6, opacity: 1.0 }).addTo(routeGroup);
-    }
+    function drawCased(coords, color, outline){ L.polyline(coords, { color: outline || cssVar('--route-outline','#ffffff'), weight: 9, opacity: 0.95 }).addTo(routeGroup); L.polyline(coords, { color: color, weight: 6, opacity: 1.0 }).addTo(routeGroup); }
 
-    // ---- GPX support ----
-    const GPX_FILES = [
-      'gpx/stegra_route_tag_1.gpx','gpx/stegra_route_tag_2.gpx','gpx/stegra_route_tag_3.gpx',
-      'gpx/stegra_route_tag_4.gpx','gpx/stegra_route_tag_5_1.gpx','gpx/stegra_route_tag_5_2.gpx'
-    ];
-    function parseGPX(xmlText){
-      const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
-      let pts = Array.from(doc.getElementsByTagName('trkpt')); if (pts.length === 0) pts = Array.from(doc.getElementsByTagName('rtept'));
-      const coords = []; for (const el of pts){ const lat = parseFloat(el.getAttribute('lat')); const lon = parseFloat(el.getAttribute('lon')); if (!isNaN(lat) && !isNaN(lon)) coords.push([lat, lon]); } return coords;
-    }
+    // GPX support
+    const GPX_FILES = ['gpx/stegra_route_tag_1.gpx','gpx/stegra_route_tag_2.gpx','gpx/stegra_route_tag_3.gpx','gpx/stegra_route_tag_4.gpx','gpx/stegra_route_tag_5_1.gpx','gpx/stegra_route_tag_5_2.gpx'];
+    function parseGPX(xmlText){ const doc = new DOMParser().parseFromString(xmlText, 'text/xml'); let pts = Array.from(doc.getElementsByTagName('trkpt')); if (pts.length === 0) pts = Array.from(doc.getElementsByTagName('rtept')); const coords = []; for (const el of pts){ const lat = parseFloat(el.getAttribute('lat')); const lon = parseFloat(el.getAttribute('lon')); if (!isNaN(lat) && !isNaN(lon)) coords.push([lat, lon]); } return coords; }
     function downsample(coords, maxPoints){ if (!coords || coords.length <= maxPoints) return coords; const step = Math.ceil(coords.length / maxPoints); const out = []; for (let i=0;i<coords.length;i+=step) out.push(coords[i]); if (coords.length % step !== 0) out.push(coords[coords.length-1]); return out; }
-    async function loadGPX(){
-      if (!GPX_FILES || GPX_FILES.length === 0) return false;
-      setStatus('Lade GPX-Tracks …');
-      let merged = [];
-      for (const file of GPX_FILES){
-        try { const res = await fetch(file, { cache: 'no-cache' }); if (!res.ok) throw new Error(file+' '+res.status); const text = await res.text(); const coords = parseGPX(text); if (coords.length) { merged = merged.concat(coords); } else { console.warn('Keine Punkte in', file); } }
-        catch (e){ console.warn('GPX Ladefehler', file, e); setStatus('GPX nicht gefunden: '+file, 'warn'); }
-      }
-      if (merged.length < 2) { setStatus('GPX nicht gefunden – zeige Fallback/OSRM.'); return false; }
-      merged = downsample(merged, 8000);
-      routeGroup.clearLayers(); drawCased(merged, cssVar('--route','#6b705c'));
-      routeCoords = merged; routeBounds = L.latLngBounds(merged);
-      map.removeLayer(fallbackGroup); map.fitBounds(routeBounds, { padding: [24,24] });
-      setStatus('GPX-Route geladen ('+merged.length+' Punkte).', 'ok');
-      routeReady = true; maybeHideSplash();
-      return true;
-    }
+    async function loadGPX(){ if (!GPX_FILES || GPX_FILES.length === 0) return false; setStatus('Lade GPX-Tracks …'); let merged = []; for (const file of GPX_FILES){ try { const res = await fetch(file, { cache: 'no-cache' }); if (!res.ok) throw new Error(file+' '+res.status); const text = await res.text(); const coords = parseGPX(text); if (coords.length) { merged = merged.concat(coords); } } catch (e){ console.warn('GPX Ladefehler', file, e); setStatus('GPX nicht gefunden: '+file, 'warn'); } } if (merged.length < 2) { setStatus('GPX nicht gefunden – zeige Fallback/OSRM.'); return false; } merged = downsample(merged, 8000); routeGroup.clearLayers(); drawCased(merged, cssVar('--route','#6b705c')); routeCoords = merged; routeBounds = L.latLngBounds(merged); map.removeLayer(fallbackGroup); map.fitBounds(routeBounds, { padding: [24,24] }); setStatus('GPX-Route geladen ('+merged.length+' Punkte).', 'ok'); routeReady = true; maybeHideSplash(); return true; }
 
-    // ---- OSRM fallback ----
-    function decodePolyline6(str){
-      var index = 0, lat = 0, lon = 0, coords = []; var factor = 1e-6;
-      while (index < str.length) {
-        var b, res = 0, sh = 0; do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
-        var dlat = (res & 1) ? ~(res >> 1) : (res >> 1); lat += dlat;
-        res = 0; sh = 0; do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
-        var dlon = (res & 1) ? ~(res >> 1) : (res >> 1); lon += dlon; coords.push([lat * factor, lon * factor]);
-      }
-      return coords;
-    }
+    // OSRM fallback
+    function decodePolyline6(str){ var index = 0, lat = 0, lon = 0, coords = []; var factor = 1e-6; while (index < str.length) { var b, res = 0, sh = 0; do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20); var dlat = (res & 1) ? ~(res >> 1) : (res >> 1); lat += dlat; res = 0; sh = 0; do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20); var dlon = (res & 1) ? ~(res >> 1) : (res >> 1); lon += dlon; coords.push([lat * factor, lon * factor]); } return coords; }
     function osrmUrlAll(points) { var coords = points.map(function(p){ return p.lon+','+p.lat; }).join(';'); return 'https://router.project-osrm.org/route/v1/driving/'+coords+'?overview=full&geometries=polyline6&alternatives=false&steps=false&continue_straight=true'; }
     async function fetchWithTimeout(url, ms){ const ctrl = new AbortController(); const id = setTimeout(function(){ ctrl.abort(); }, ms); try { const res = await fetch(url, { signal: ctrl.signal }); return res; } finally { clearTimeout(id); } }
-    (async function initRoute(){
-      const ok = await loadGPX(); if (ok) return;
-      try {
-        const res = await fetchWithTimeout(osrmUrlAll(points), 8000); if (!res.ok) throw new Error('OSRM '+res.status);
-        const data = await res.json(); if (!data.routes || !data.routes[0]) throw new Error('Keine Route');
-        const coords = decodePolyline6(data.routes[0].geometry).map(function(x){ return [x[0], x[1]]; });
-        drawCased(coords, cssVar('--route','#6b705c')); routeCoords = coords; routeBounds = L.latLngBounds(coords);
-        map.removeLayer(fallbackGroup); setStatus('OSRM-Route geladen.', 'ok');
-      } catch(e){ console.warn('OSRM Problem', e); setStatus('Zeige Fallback (Straßenroute nicht geladen).', 'warn'); }
-      routeReady = true; maybeHideSplash();
-    })();
+    (async function initRoute(){ const ok = await loadGPX(); if (ok) return; try { const res = await fetchWithTimeout(osrmUrlAll(points), 8000); if (!res.ok) throw new Error('OSRM '+res.status); const data = await res.json(); if (!data.routes || !data.routes[0]) throw new Error('Keine Route'); const coords = decodePolyline6(data.routes[0].geometry).map(function(x){ return [x[0], x[1]]; }); drawCased(coords, cssVar('--route','#6b705c')); routeCoords = coords; routeBounds = L.latLngBounds(coords); map.removeLayer(fallbackGroup); setStatus('OSRM-Route geladen.', 'ok'); } catch(e){ console.warn('OSRM Problem', e); setStatus('Zeige Fallback (Straßenroute nicht geladen).', 'warn'); } routeReady = true; maybeHideSplash(); })();
 
-    // ---- Wetter / Popups ----
+    // Weather popups
     function windyLink(lat, lon){ var z=8; return 'https://www.windy.com/'+lat.toFixed(3)+'/'+lon.toFixed(3)+'?'+lat.toFixed(3)+','+lon.toFixed(3)+','+z; }
     var codeMap = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"};
     function fmt(n, unit){ return (n==null || isNaN(n)) ? '-' : (Math.round(n)+(unit||'')); }
     async function loadPopupForPoint(p, marker) { await loadPopupGeneric(p.name, p.lat, p.lon, marker); }
     async function loadPopupGeneric(label, lat, lon, marker) {
-      var url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
-              + '&current=temperature_2m,precipitation,wind_speed_10m,weather_code'
-              + '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code'
-              + '&timezone=auto';
-      try {
-        const res = await fetch(url); const data = await res.json();
-        var cur = data.current || {}; var d = data.daily || {};
-        var idx = (mode==='today') ? 0 : (mode==='tomorrow' ? 1 : 2);
-        var dayLabel = (idx===0?'Heute':(idx===1?'Morgen':'Übermorgen'));
-        var wxCodeDay = (d.weather_code && d.weather_code[idx] != null) ? d.weather_code[idx] : null;
-        var wxDescDay = codeMap[wxCodeDay] || '–';
-        var maxT = d.temperature_2m_max && d.temperature_2m_max[idx];
-        var minT = d.temperature_2m_min && d.temperature_2m_min[idx];
-        var pop  = d.precipitation_probability_max && d.precipitation_probability_max[idx];
-        var html = '<div>' +
-          '<strong>'+label+'</strong><br/>' +
-          '<div style="margin:4px 0 6px;"><em>'+dayLabel+'</em>: <strong>Max '+fmt(maxT,'°C')+'</strong> · Min '+fmt(minT,'°C')+' · Regenwkt. '+(pop==null?'-':pop+'%')+' · '+wxDescDay+'</div>' +
-          '<div style="font-size:12px;color:var(--muted);">Jetzt: '+fmt(cur.temperature_2m,'°C')+' · Wind '+fmt(cur.wind_speed_10m,' km/h')+' · '+(codeMap[cur.weather_code] || '–')+'</div>' +
-          '<a href="'+windyLink(lat, lon)+'" target="_blank" rel="noopener">Details auf Windy öffnen</a>' +
-        '</div>';
+      var url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon + '&current=temperature_2m,precipitation,wind_speed_10m,weather_code' + '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code' + '&timezone=auto';
+      try { const res = await fetch(url); const data = await res.json();
+        var cur = data.current || {}; var d = data.daily || {}; var idx = (mode==='today') ? 0 : (mode==='tomorrow' ? 1 : 2);
+        var dayLabel = (idx===0?'Heute':(idx===1?'Morgen':'Übermorgen')); var wxCodeDay = (d.weather_code && d.weather_code[idx] != null) ? d.weather_code[idx] : null;
+        var wxDescDay = codeMap[wxCodeDay] || '–'; var maxT = d.temperature_2m_max && d.temperature_2m_max[idx]; var minT = d.temperature_2m_min && d.temperature_2m_min[idx]; var pop  = d.precipitation_probability_max && d.precipitation_probability_max[idx];
+        var html = '<div><strong>'+label+'</strong><br/>' + '<div style="margin:4px 0 6px;"><em>'+dayLabel+'</em>: <strong>Max '+fmt(maxT,'°C')+'</strong> · Min '+fmt(minT,'°C')+' · Regenwkt. '+(pop==null?'-':pop+'%')+' · '+wxDescDay+'</div>' + '<div style="font-size:12px;color:var(--muted);">Jetzt: '+fmt(cur.temperature_2m,'°C')+' · Wind '+fmt(cur.wind_speed_10m,' km/h')+' · '+(codeMap[cur.weather_code] || '–')+'</div>' + '<a href="'+windyLink(lat, lon)+'" target="_blank" rel="noopener">Details auf Windy öffnen</a>' + '</div>';
         marker.bindPopup(html).openPopup();
       } catch(e) { marker.bindPopup('<div><strong>'+label+'</strong><br/><span style="color:var(--muted);">Wetter gerade nicht erreichbar.</span></div>').openPopup(); }
     }
 
-    // ---- Geolocation ----
+    // Geolocation
     var meMarker = null; var lastMe = null;
-    function showGeoError(err){
-      var msg = 'Standortfehler';
-      if (!err) msg = 'Standortfehler (unbekannt)';
+    function showGeoError(err){ var msg = 'Standortfehler'; if (!err) msg = 'Standortfehler (unbekannt)';
       else if (err.code === 1) msg = 'Ortung abgelehnt – Einstellungen ▸ Datenschutz ▸ Ortungsdienste ▸ „Moto Wetter“ ▸ Beim Verwenden + Genauer Standort';
       else if (err.code === 2) msg = 'Ortung nicht verfügbar – GPS/Mobilfunk aktivieren, freie Sicht und erneut versuchen';
-      else if (err.code === 3) msg = 'Ortung Timeout – nochmals tippen';
-      else msg = 'Ortung: '+(err.message||'Fehler');
-      setStatus(msg, 'warn');
-    }
+      else if (err.code === 3) msg = 'Ortung Timeout – nochmals tippen'; else msg = 'Ortung: '+(err.message||'Fehler'); setStatus(msg, 'warn'); }
     function markMe(lat, lon, recenter){
       lastMe = {lat:+lat, lon:+lon};
       if (meMarker) map.removeLayer(meMarker);
@@ -411,13 +400,7 @@
       meMarker.bindPopup('Lade Wetter…').openPopup();
       meMarker.on('click', function(){ meMarker.bindPopup('Lade Wetter…').openPopup(); loadPopupGeneric('Dein Standort', +lat, +lon, meMarker); });
       loadPopupGeneric('Dein Standort', +lat, +lon, meMarker);
-      if (recenter) {
-        if (routeBounds){
-          var inside = routeBounds.contains(L.latLng(+lat, +lon));
-          if (inside){ map.setView([+lat, +lon], 11); }
-          else { var combo = routeBounds.pad(0); combo.extend([+lat, +lon]); map.fitBounds(combo, { padding: [28,28] }); }
-        } else { map.setView([+lat, +lon], 11); }
-      }
+      if (recenter) { if (routeBounds){ var inside = routeBounds.contains(L.latLng(+lat, +lon)); if (inside){ map.setView([+lat, +lon], 11); } else { var combo = routeBounds.pad(0); combo.extend([+lat, +lon]); map.fitBounds(combo, { padding: [28,28] }); } } else { map.setView([+lat, +lon], 11); } }
     }
     function requestGeoOnceWithWatchFallback(opts){
       opts = Object.assign({enableHighAccuracy:true, timeout:10000, maximumAge:60000}, opts||{});
@@ -442,93 +425,50 @@
       });
     }
     async function locateMe(userTap, recenter){
-      const status = document.getElementById('status');
-      status.style.display='block'; status.textContent = 'Bestimme deinen Standort …';
-      try {
-        const pos = await requestGeoOnceWithWatchFallback({ enableHighAccuracy:true, timeout: 10000, maximumAge: 60000 });
-        const lat = pos.coords.latitude, lon = pos.coords.longitude;
-        markMe(lat, lon, !!recenter);
+      const status = document.getElementById('status'); status.style.display='block'; status.textContent = 'Bestimme deinen Standort …';
+      try { const pos = await requestGeoOnceWithWatchFallback({ enableHighAccuracy:true, timeout: 10000, maximumAge: 60000 });
+        const lat = pos.coords.latitude, lon = pos.coords.longitude; markMe(lat, lon, !!recenter);
         status.textContent = 'Zentriert.'; setTimeout(function(){ status.style.display='none'; }, 1600);
-      } catch(err){
-        console.warn('Geo-Error', err);
-        showGeoError(err);
-        setTimeout(function(){ status.style.display='none'; }, 2400);
-      }
+      } catch(err){ console.warn('Geo-Error', err); showGeoError(err); setTimeout(function(){ status.style.display='none'; }, 2400); }
     }
 
-    // ---- Snapshots / Publish (unchanged) ----
-    const SNAP_KEY = 'mw-snaps-v1';
-    let snapData = []; let snapsLayer = L.layerGroup().addTo(map);
+    // Snapshots / Publish
+    const SNAP_KEY = 'mw-snaps-v1'; let snapData = []; let snapsLayer = L.layerGroup().addTo(map);
     let autoLogEnabled = true; let autoPublishEnabled = false; const MIN_INTERVAL_HOURS = 3;
     function loadSnaps(){ try { snapData = JSON.parse(localStorage.getItem(SNAP_KEY) || '[]'); } catch(e){ snapData=[]; } }
     function saveSnaps(){ try { localStorage.setItem(SNAP_KEY, JSON.stringify(snapData)); } catch(e){} }
     function drawSnaps(){
       snapsLayer.clearLayers();
-      snapData.forEach(s => {
-        const m = L.circleMarker([s.lat, s.lon], { radius: 5, weight: 2, color: cssVar('--snap','#38bdf8'), fillOpacity:.7 });
-        const when = new Date(s.t).toLocaleString();
-        const desc = (s.wx_desc||''); const temp = (s.temp!=null? Math.round(s.temp)+'°C':'-'); const wind = (s.wind!=null? Math.round(s.wind)+' km/h':'-');
-        m.bindPopup('<strong>Snapshot</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc);
-        m.addTo(snapsLayer);
-      });
-      if (snapData.length>1){
-        const coords = snapData.map(s => [s.lat, s.lon]);
-        L.polyline(coords, { color: '#ffffff', weight: 7, opacity: .9 }).addTo(snapsLayer);
-        L.polyline(coords, { color: cssVar('--snap','#38bdf8'), weight: 4, opacity: 1 }).addTo(snapsLayer);
-      }
+      snapData.forEach(s => { const m = L.circleMarker([s.lat, s.lon], { radius: 5, weight: 2, color: '#38bdf8', fillOpacity:.7 });
+        const when = new Date(s.t).toLocaleString(); const desc = (s.wx_desc||''); const temp = (s.temp!=null? Math.round(s.temp)+'°C':'-'); const wind = (s.wind!=null? Math.round(s.wind)+' km/h':'-');
+        m.bindPopup('<strong>Snapshot</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc); m.addTo(snapsLayer); });
+      if (snapData.length>1){ const coords = snapData.map(s => [s.lat, s.lon]); L.polyline(coords, { color: '#ffffff', weight: 7, opacity: .9 }).addTo(snapsLayer); L.polyline(coords, { color: '#38bdf8', weight: 4, opacity: 1 }).addTo(snapsLayer); }
     }
     function hoursBetween(a,b){ return Math.abs((b-a)/36e5); }
     function lastSnap(){ return snapData.length? snapData[snapData.length-1]: null; }
-
     async function snapshotNow(lat, lon){
       const url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&current=temperature_2m,precipitation,wind_speed_10m,weather_code&timezone=auto';
-      try {
-        const res = await fetch(url); const data = await res.json();
+      try { const res = await fetch(url); const data = await res.json();
         const cur = data.current || {}; const codeMapLocal = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"};
         const rec = { t: new Date().toISOString(), lat, lon, temp: cur.temperature_2m, wind: cur.wind_speed_10m, wx_code: cur.weather_code, wx_desc: codeMapLocal[cur.weather_code] || '' };
-        snapData.push(rec); saveSnaps(); drawSnaps();
-        setStatus('Snapshot gespeichert.', 'ok');
-        if (autoPublishEnabled) { try { await publishHistory(); } catch(e){ setStatus('Auto‑Publish fehlgeschlagen', 'warn'); } }
-      } catch(e){ setStatus('Snapshot: Wetter nicht erreichbar', 'warn'); }
+        snapData.push(rec); saveSnaps(); drawSnaps(); setStatus('Snapshot gespeichert.', 'ok'); if (autoPublishEnabled) { try { await publishHistory(); } catch(e){ setStatus('Auto‑Publish fehlgeschlagen', 'warn'); } } } catch(e){ setStatus('Snapshot: Wetter nicht erreichbar', 'warn'); }
     }
+    async function tryAutoSnapshot(){ try { const saved = JSON.parse(localStorage.getItem('mw-autolog')||'true'); autoLogEnabled = !!saved; } catch(e){} if (!autoLogEnabled) return; loadSnaps(); const last = lastSnap(); const now = new Date(); if (last && hoursBetween(new Date(last.t), now) < MIN_INTERVAL_HOURS) { setStatus('Auto‑Log übersprungen'); return; } if (lastMe) snapshotNow(lastMe.lat, lastMe.lon); }
 
-    async function tryAutoSnapshot(){
-      try { const saved = JSON.parse(localStorage.getItem('mw-autolog')||'true'); autoLogEnabled = !!saved; } catch(e){}
-      if (!autoLogEnabled) return;
-      loadSnaps();
-      const last = lastSnap(); const now = new Date();
-      if (last && hoursBetween(new Date(last.t), now) < MIN_INTERVAL_HOURS) { setStatus('Auto‑Log übersprungen'); return; }
-      if (lastMe) snapshotNow(lastMe.lat, lastMe.lon);
-    }
-
-    function buildHistoryJSON(){
-      const fc = {
-        type: 'FeatureCollection',
-        generatedAt: new Date().toISOString(),
-        features: [
-          { type:'Feature', geometry:{ type:'LineString', coordinates: snapData.map(s => [s.lon, s.lat]) }, properties:{ kind:'snapline', points:snapData.length } },
-          ...snapData.map(s => ({ type:'Feature', geometry:{ type:'Point', coordinates:[s.lon, s.lat] }, properties:{ t:s.t, temp:s.temp, wind:s.wind, wx_code:s.wx_code, wx_desc:s.wx_desc } }))
-        ]
-      };
-      return JSON.stringify(fc, null, 2);
-    }
+    function buildHistoryJSON(){ const fc = { type: 'FeatureCollection', generatedAt: new Date().toISOString(), features: [ { type:'Feature', geometry:{ type:'LineString', coordinates: snapData.map(s => [s.lon, s.lat]) }, properties:{ kind:'snapline', points:snapData.length } }, ...snapData.map(s => ({ type:'Feature', geometry:{ type:'Point', coordinates:[s.lon, s.lat] }, properties:{ t:s.t, temp:s.temp, wind:s.wind, wx_code:s.wx_code, wx_desc:s.wx_desc } })) ] }; return JSON.stringify(fc, null, 2); }
     function exportSnaps(){ if (!snapData.length){ alert('Keine Snapshots vorhanden.'); return; } const json = buildHistoryJSON(); const blob = new Blob([json], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'history.json'; a.click(); URL.revokeObjectURL(a.href); setStatus('Export erstellt (history.json)', 'ok'); }
 
     function loadGhCfg(){ try { return JSON.parse(localStorage.getItem('mw-gh')||'{}'); } catch(e){ return {}; } }
     function saveGhCfg(cfg){ try { localStorage.setItem('mw-gh', JSON.stringify(cfg)); } catch(e){} }
     function base64Encode(str){ return btoa(unescape(encodeURIComponent(str))); }
-    async function getFileSha(owner, repo, branch, path, token){
-      const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`;
+    async function getFileSha(owner, repo, branch, path, token){ const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`;
       const res = await fetch(url, { headers: { 'Accept':'application/vnd.github+json','Authorization': 'Bearer '+token,'X-GitHub-Api-Version': '2022-11-28','User-Agent': 'MotoWetter' }});
-      if (res.status === 404) return null; if (!res.ok) throw new Error('Get SHA: '+res.status);
-      const data = await res.json(); return data.sha || null;
-    }
+      if (res.status === 404) return null; if (!res.ok) throw new Error('Get SHA: '+res.status); const data = await res.json(); return data.sha || null; }
     async function putFile(owner, repo, branch, path, token, content, message, sha){
       const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
       const body = { message, content: base64Encode(content), branch }; if (sha) body.sha = sha;
       const res = await fetch(url, { method:'PUT', headers: { 'Accept':'application/vnd.github+json','Authorization': 'Bearer '+token,'X-GitHub-Api-Version': '2022-11-28','User-Agent':'MotoWetter' }, body: JSON.stringify(body) });
-      if (!res.ok) { const t = await res.text(); throw new Error('PUT failed: '+res.status+' '+t); }
-      return res.json();
+      if (!res.ok) { const t = await res.text(); throw new Error('PUT failed: '+res.status+' '+t); } return res.json();
     }
     async function publishHistory(){
       if (!snapData.length){ alert('Keine Snapshots vorhanden.'); return; }
@@ -541,53 +481,56 @@
         if (!cfg.owner || !cfg.repo || !cfg.branch || !cfg.token) { setStatus('Publish abgebrochen'); return; }
         saveGhCfg(cfg);
       }
-      const path = 'history/history.json';
-      const message = 'Update history.json ('+(new Date()).toISOString()+')';
-      try {
-        setStatus('Veröffentliche …');
-        const sha = await getFileSha(cfg.owner, cfg.repo, cfg.branch, path, cfg.token);
-        const res = await putFile(cfg.owner, cfg.repo, cfg.branch, path, cfg.token, buildHistoryJSON(), message, sha);
-        setStatus('Veröffentlicht ✓', 'ok');
-        return res;
-      } catch(e){ console.error(e); alert('Publish fehlgeschlagen:\n'+e.message); setStatus('Publish fehlgeschlagen', 'err'); throw e; }
+      const path = 'history/history.json'; const message = 'Update history.json ('+(new Date()).toISOString()+')';
+      try { setStatus('Veröffentliche …'); const sha = await getFileSha(cfg.owner, cfg.repo, cfg.branch, path, cfg.token); const res = await putFile(cfg.owner, cfg.repo, cfg.branch, path, cfg.token, buildHistoryJSON(), message, sha); setStatus('Veröffentlicht ✓', 'ok'); return res; } catch(e){ console.error(e); alert('Publish fehlgeschlagen:\n'+e.message); setStatus('Publish fehlgeschlagen', 'err'); throw e; }
     }
 
-    // ---- Published history viewer ----
+    // Published history
     async function loadPublishedHistory(){
-      try {
-        const res = await fetch('history/history.json', { cache: 'no-cache' });
-        if (!res.ok) throw new Error(res.status);
-        const data = await res.json();
-        const features = data.features || [];
-        const histLayer = L.layerGroup().addTo(map);
+      try { const res = await fetch('history/history.json', { cache: 'no-cache' }); if (!res.ok) throw new Error(res.status); const data = await res.json();
+        const features = data.features || []; const histLayer = L.layerGroup().addTo(map);
         const line = features.find(f => f.geometry && f.geometry.type==='LineString');
-        if (line){
-          const coords = line.geometry.coordinates.map(c => [c[1], c[0]]);
-          L.polyline(coords, { color: '#ffffff', weight: 8, opacity: .9 }).addTo(histLayer);
-          L.polyline(coords, { color: cssVar('--hist','#c084fc'), weight: 5, opacity: 1 }).addTo(histLayer);
-        }
-        features.filter(f => f.geometry && f.geometry.type==='Point').forEach(f => {
-          const c = f.geometry.coordinates; const p = f.properties || {};
-          const when = p.t ? new Date(p.t).toLocaleString() : '';
-          const temp = (p.temp!=null? Math.round(p.temp)+'°C':'-'); const wind = (p.wind!=null? Math.round(p.wind)+' km/h':'-');
-          const desc = p.wx_desc || '';
-          L.circleMarker([c[1], c[0]], { radius: 5, weight: 2, color: cssVar('--hist','#c084fc'), fillOpacity:.7 })
-            .bindPopup('<strong>Besuch</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc).addTo(histLayer);
-        });
+        if (line){ const coords = line.geometry.coordinates.map(c => [c[1], c[0]]); L.polyline(coords, { color: '#ffffff', weight: 8, opacity: .9 }).addTo(histLayer); L.polyline(coords, { color: '#c084fc', weight: 5, opacity: 1 }).addTo(histLayer); }
+        features.filter(f => f.geometry && f.geometry.type==='Point').forEach(f => { const c = f.geometry.coordinates; const p = f.properties || {}; const when = p.t ? new Date(p.t).toLocaleString() : ''; const temp = (p.temp!=null? Math.round(p.temp)+'°C':'-'); const wind = (p.wind!=null? Math.round(p.wind)+' km/h':'-'); const desc = p.wx_desc || ''; L.circleMarker([c[1], c[0]], { radius: 5, weight: 2, color: '#c084fc', fillOpacity:.7 }).bindPopup('<strong>Besuch</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc).addTo(histLayer); });
         setStatus('Veröffentlichte Besuche geladen');
       } catch(e){ console.log('Keine veröffentlichte History gefunden.'); }
     }
 
-    // ---- Init ----
-    var latlngs = points.map(function(p){ return [p.lat, p.lon]; });
-    var routeBounds = null; var routeCoords = null;
+    // Fit route helper
     function fitRoute(){ var b = routeBounds || L.latLngBounds(latlngs); map.fitBounds(b, { padding: [24,24] }); setStatus('Route zentriert.', 'ok'); }
 
+    // Wire sheet buttons
+    document.getElementById('fit').addEventListener('click', function(){ fitRoute(); haptic(); });
+    document.getElementById('locate').addEventListener('click', function(){ locateMe(true, true); haptic(); });
+    document.getElementById('share').addEventListener('click', async function(){ haptic(); const url = location.href; if (navigator.share) { try { await navigator.share({ title: document.title, url: url }); } catch(e){} } else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } } });
+
+    // Quick action
+    document.getElementById('fabNow').addEventListener('click', function(){ locateMe(true, true); haptic(); });
+
+    // Toggles state
+    const autoLogEl = document.getElementById('toggleAutoLog');
+    const autoPubEl = document.getElementById('toggleAutoPublish');
+    function loadToggles(){ try { autoLogEnabled = JSON.parse(localStorage.getItem('mw-autolog')||'true'); } catch(e){} try { autoPublishEnabled = JSON.parse(localStorage.getItem('mw-autopub')||'false'); } catch(e){} autoLogEl.checked = !!autoLogEnabled; autoPubEl.checked = !!autoPublishEnabled; }
+    function saveToggles(){ try { localStorage.setItem('mw-autolog', JSON.stringify(!!autoLogEnabled)); } catch(e){} try { localStorage.setItem('mw-autopub', JSON.stringify(!!autoPublishEnabled)); } catch(e){} }
+    autoLogEl.addEventListener('change', function(){ autoLogEnabled = autoLogEl.checked; saveToggles(); setStatus('Auto‑Log '+(autoLogEnabled?'aktiv':'aus'), autoLogEnabled?'ok':'warn'); });
+    autoPubEl.addEventListener('change', function(){ autoPublishEnabled = autoPubEl.checked; saveToggles(); setStatus('Auto‑Publish '+(autoPublishEnabled?'aktiv':'aus'), autoPublishEnabled?'ok':'warn'); });
+
+    // Export/Publish
+    document.getElementById('snapExport').addEventListener('click', function(){ exportSnaps(); });
+    document.getElementById('snapPublish').addEventListener('click', function(){ publishHistory(); });
+
+    // Weather popup bindings for markers
+    async function loadPopupForPoint(p, m){ await loadPopupGeneric(p.name, p.lat, p.lon, m); }
+
+    // Init
+    var latlngs = points.map(function(p){ return [p.lat, p.lon]; });
+    var routeBounds = null; var routeCoords = null;
     (function start(){
+      loadToggles();
       loadSnaps(); drawSnaps();
       loadPublishedHistory();
       fitRoute();
-      setMarkerVisibility(); // ensure labels on initial overview
+      setMarkerVisibility();
       setStatus('Tippe „Ortung“, um zu zentrieren');
       setTimeout(tryAutoSnapshot, 3000);
       setTimeout(function(){ if (!mapReady || !routeReady) maybeHideSplash(); }, 2600);
