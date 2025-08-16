@@ -14,69 +14,142 @@
   <meta name="apple-mobile-web-app-title" content="Moto Wetter">
   <style>
     :root {
-      --bg: #f9fafb; --text: #111827; --muted: #6b7280;
-      --chip-bg: #111827; --chip-br: rgba(255,255,255,.9); --chip-shadow: 0 1px 0 rgba(0,0,0,.25);
-      --route: #6b705c; --route-outline: #ffffff;
-      --me: #2563eb; --btn-bg: rgba(17,24,39,.96); --btn-br: rgba(255,255,255,.9); --btn-tx: #fff;
-      --accent: #111827; --snap:#0ea5e9; --hist:#8b5cf6;
+      --bg: #0b0f14; --text: #e5e7eb; --muted: #9ca3af;
+      --chip-bg: rgba(15,23,42,.55); --chip-br: rgba(255,255,255,.18);
+      --route: #c3d0df; --route-outline: rgba(0,0,0,.7);
+      --me: #60a5fa; --btn-bg: rgba(15,23,42,.85); --btn-br: rgba(255,255,255,.18); --btn-tx: #e5e7eb;
+      --accent: #111827; --snap:#38bdf8; --hist:#c084fc;
+      --glass-bg: rgba(17,24,39,.8); --glass-br: rgba(255,255,255,.12);
+      --ok:#10b981; --warn:#f59e0b; --err:#ef4444;
+      --btn-h: 36px; --btn-radius: 999px; --btn-gap: 6px; --btn-pad-x: 10px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:#f8fafc; --text:#111827; --muted:#6b7280;
+        --chip-bg: rgba(255,255,255,.75); --chip-br: rgba(0,0,0,.08);
+        --route:#6b705c; --route-outline:#ffffff;
+        --btn-bg: rgba(17,24,39,.92); --btn-br: rgba(255,255,255,.85); --btn-tx: #fff;
+        --glass-bg: rgba(255,255,255,.92); --glass-br: rgba(0,0,0,.08);
+      }
     }
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
     #map { width: 100%; height: 100vh; }
 
-    .toolbar { position: absolute; left: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); top: auto; display: grid; gap: 8px; z-index: 1000; }
-    .btn { appearance: none; border: 2px solid var(--btn-br); background: var(--btn-bg); color: var(--btn-tx);
-      border-radius: 999px; padding: 6px 10px; font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,.18); min-width: 40px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-    .segbtns { display:flex; gap:6px; flex-wrap: wrap; }
-    .btn.pill { border-radius: 999px; padding: 5px 9px; }
-    .btn.active { box-shadow: 0 6px 14px rgba(0,0,0,.22); border-color: rgba(255,255,255,1); }
+    /* Bottom toolbar */
+    .toolbar {
+      position: absolute; left: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); top: auto;
+      display: grid; gap: 8px; z-index: 1000;
+    }
+    .btn {
+      appearance: none; border: 1.8px solid var(--btn-br); background: var(--btn-bg); color: var(--btn-tx);
+      height: var(--btn-h); padding: 0 var(--btn-pad-x);
+      border-radius: var(--btn-radius); font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      cursor: pointer; box-shadow: 0 8px 18px rgba(0,0,0,.28); -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+      display: inline-grid; grid-auto-flow: column; align-items: center; gap: var(--btn-gap);
+    }
+    .btn svg { width: 14px; height: 14px; display: block; }
+    .segbtns { display:flex; gap:6px; flex-wrap: wrap; max-width: min(88vw, 520px); }
+    .btn.active { box-shadow: 0 10px 20px rgba(0,0,0,.34); border-color: rgba(255,255,255,.9); }
+    .btn.ghost { background: transparent; backdrop-filter: blur(6px); }
 
-    .status { position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); left: 12px; z-index: 1000;
-      background: rgba(255,255,255,.96); border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px 10px;
-      font: 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: var(--muted); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
-    .status.ok { border-color:#10b981; color:#065f46; } .status.warn { border-color:#f59e0b; color:#7c2d12; } .status.err { border-color:#ef4444; color:#7f1d1d; }
+    /* Status toast (glass) */
+    .status {
+      position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); left: 12px; z-index: 1100;
+      background: var(--glass-bg); border: 1px solid var(--glass-br); border-radius: 12px; padding: 10px 12px;
+      font: 12px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: var(--text);
+      box-shadow: 0 12px 24px rgba(0,0,0,.35); backdrop-filter: blur(8px);
+    }
+    .status.ok { border-color: color-mix(in oklab, var(--glass-br), var(--ok) 40%); }
+    .status.warn { border-color: color-mix(in oklab, var(--glass-br), var(--warn) 40%); }
+    .status.err { border-color: color-mix(in oklab, var(--glass-br), var(--err) 40%); }
 
+    /* Marker chips (glass) */
     .chip-marker { transform: translate(-50%, -34px); }
-    .chip-marker > div { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--chip-bg); color: #fff;
-      font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; border: 2px solid var(--chip-br); box-shadow: 0 6px 16px rgba(0,0,0,.18);
-      white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px; text-shadow: var(--chip-shadow); }
+    .chip-marker > div {
+      display: inline-block; padding: 4px 10px; border-radius: 999px;
+      background: var(--chip-bg); color: var(--text);
+      font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      border: 1.5px solid var(--chip-br); box-shadow: 0 10px 22px rgba(0,0,0,.28);
+      white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px;
+      backdrop-filter: blur(8px) saturate(1.1);
+    }
     .hidden { display: none !important; }
 
-    .fab { position: fixed; right: calc(env(safe-area-inset-right, 0px) + 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-      z-index: 3000; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff;
-      font: 900 14px/1 system-ui, -apple-system, Segoe UI; border: 2px solid rgba(255,255,255,.9); box-shadow: 0 12px 24px rgba(0,0,0,.22);
-      -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-    @supports (bottom: constant(safe-area-inset-bottom)) { .fab { right: calc(constant(safe-area-inset-right) + 14px); bottom: calc(constant(safe-area-inset-bottom) + 16px); } }
+    /* FAB (smaller now) */
+    .fab {
+      position: fixed;
+      right: calc(env(safe-area-inset-right, 0px) + 14px);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+      z-index: 3000;
+      width: 56px; height: 56px; border-radius: 18px;
+      display: grid; place-items: center;
+      background: linear-gradient(180deg, #1f2937, #0f172a); color: #fff; font: 900 12px/1 system-ui;
+      border: 1.8px solid var(--btn-br); box-shadow: 0 16px 28px rgba(0,0,0,.4);
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    .fab svg { width: 20px; height: 20px; display:block; }
 
     .leaflet-control { border-radius: 8px; overflow: hidden; }
 
-    @media (prefers-color-scheme: dark) {
-      :root { --bg:#0b0f14; --text:#e5e7eb; --muted:#9ca3af; --chip-bg:#0f172a; --chip-br:rgba(255,255,255,.2); --btn-bg:#0f172a; --btn-br:rgba(255,255,255,.2); --btn-tx:#e5e7eb; --route:#94a3b8; --route-outline:#0b0f14; }
-      .status { background: rgba(17,24,39,.96); border-color:#1f2937; color:#cbd5e1; }
+    /* Prettier Leaflet popups */
+    .leaflet-popup-content-wrapper {
+      background: var(--glass-bg); color: var(--text); border-radius: 14px; border: 1px solid var(--glass-br);
+      box-shadow: 0 16px 32px rgba(0,0,0,.38); backdrop-filter: blur(8px);
     }
+    .leaflet-popup-tip { background: var(--glass-bg); border: 1px solid var(--glass-br); }
+    .leaflet-popup-content { margin: 10px 12px; }
 
-    @media (max-width: 480px) { .toolbar { gap: 6px; } .btn { font-size: 11px; padding: 5px 9px; } .btn.pill { padding: 4px 8px; } }
+    @media (max-width: 480px) {
+      .toolbar { gap: 6px; }
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
 
   <div class="toolbar">
-    <button class="btn" id="fit">Zentrieren</button>
-    <button class="btn" id="locate">Ortung</button>
-    <button class="btn" id="share">Teilen</button>
+    <!-- Hauptaktionen jetzt als einheitliche Pill-Buttons (36px hoch) -->
     <div class="segbtns">
-      <button class="btn pill" id="modeToday">Heute</button>
-      <button class="btn pill" id="modeTomorrow">Morgen</button>
-      <button class="btn pill" id="modeDayAfter">Übermorgen</button>
-      <button class="btn pill" id="autoLog">Auto‑Log</button>
-      <button class="btn pill" id="snapExport">Export</button>
-      <button class="btn pill" id="snapPublish">Publish</button>
-      <button class="btn pill" id="autoPublish">Auto‑Pub</button>
+      <button class="btn" id="fit" title="Gesamte Route">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 3h7M3 3v7M21 3h-7M21 3v7M3 21h7M3 21v-7M21 21h-7M21 21v-7"/>
+        </svg>
+        Zentrieren
+      </button>
+      <button class="btn" id="locate" title="Auf mich zentrieren">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+          <circle cx="12" cy="12" r="5"/>
+        </svg>
+        Ortung
+      </button>
+      <button class="btn" id="share" title="Link teilen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/>
+          <path d="M16 6l-4-4-4 4M12 2v14"/>
+        </svg>
+        Teilen
+      </button>
+    </div>
+
+    <!-- Wetter-Modus + Tools (gleiches Button-Design / -Höhe) -->
+    <div class="segbtns">
+      <button class="btn" id="modeToday">Heute</button>
+      <button class="btn" id="modeTomorrow">Morgen</button>
+      <button class="btn" id="modeDayAfter">Übermorgen</button>
+      <button class="btn ghost" id="autoLog">Auto‑Log</button>
+      <button class="btn ghost" id="snapExport">Export</button>
+      <button class="btn ghost" id="snapPublish">Publish</button>
+      <button class="btn ghost" id="autoPublish">Auto‑Pub</button>
     </div>
   </div>
 
-  <button class="fab" id="fabNow" title="Jetzt-Wetter" aria-label="Jetzt-Wetter">JETZT</button>
+  <button class="fab" id="fabNow" title="Jetzt-Wetter" aria-label="Jetzt-Wetter">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 7v5l3 3"/>
+    </svg>
+  </button>
   <div class="status" id="status">Karte lädt …</div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -253,9 +326,8 @@
       } catch(e) { marker.bindPopup('<div><strong>'+label+'</strong><br/><span style="color:var(--muted);">Wetter gerade nicht erreichbar.</span></div>').openPopup(); }
     }
 
-    // ---- Geolocation (hotfix) ----
+    // ---- Geolocation (hotfix, unverändert) ----
     var meMarker = null; var lastMe = null;
-
     function showGeoError(err){
       var msg = 'Standortfehler';
       if (!err) msg = 'Standortfehler (unbekannt)';
@@ -265,11 +337,10 @@
       else msg = 'Ortung: '+(err.message||'Fehler');
       setStatus(msg, 'warn');
     }
-
     function markMe(lat, lon, recenter){
       lastMe = {lat:+lat, lon:+lon};
       if (meMarker) map.removeLayer(meMarker);
-      meMarker = L.circleMarker([+lat, +lon], { radius: 6, weight: 2, color: cssVar('--me','#2563eb'), fillOpacity: .6 }).addTo(map);
+      meMarker = L.circleMarker([+lat, +lon], { radius: 6, weight: 2, color: cssVar('--me','#60a5fa'), fillOpacity: .7 }).addTo(map);
       meMarker.bindPopup('Lade Wetter…').openPopup();
       meMarker.on('click', function(){ meMarker.bindPopup('Lade Wetter…').openPopup(); loadPopupGeneric('Dein Standort', +lat, +lon, meMarker); });
       loadPopupGeneric('Dein Standort', +lat, +lon, meMarker);
@@ -281,7 +352,6 @@
         } else { map.setView([+lat, +lon], 11); }
       }
     }
-
     function requestGeoOnceWithWatchFallback(opts){
       opts = Object.assign({enableHighAccuracy:true, timeout:10000, maximumAge:60000}, opts||{});
       return new Promise((resolve, reject) => {
@@ -290,11 +360,8 @@
         const clear = (id)=>{ try{ navigator.geolocation.clearWatch(id);}catch(e){} };
         const onSuccess = (pos)=>{ if (settled) return; settled = true; clear(watchId); resolve(pos); };
         const onError   = (err)=>{
-          // start watch fallback only once
           if (settled) return;
-          // If denied, don't start watch; reject immediately
           if (err && err.code === 1) { settled = true; reject(err); return; }
-          // try watchPosition for a quick fix
           watchId = navigator.geolocation.watchPosition(
             p => { if (settled) return; settled = true; clear(watchId); resolve(p); },
             e => {},
@@ -307,7 +374,6 @@
         catch(e){ reject(e); }
       });
     }
-
     async function locateMe(userTap, recenter){
       const status = document.getElementById('status');
       status.style.display='block'; status.textContent = 'Bestimme deinen Standort …';
@@ -319,12 +385,11 @@
       } catch(err){
         console.warn('Geo-Error', err);
         showGeoError(err);
-        // WICHTIG: bei Fehler nach Tap NICHT automatisch Route zentrieren – lass die Karte wie sie ist
         setTimeout(function(){ status.style.display='none'; }, 2400);
       }
     }
 
-    // ---- Snapshots / Publish (unverändert) ----
+    // ---- Snapshots / Publish ----
     const SNAP_KEY = 'mw-snaps-v1';
     let snapData = []; let snapsLayer = L.layerGroup().addTo(map);
     let autoLogEnabled = true; let autoPublishEnabled = false; const MIN_INTERVAL_HOURS = 3;
@@ -333,7 +398,7 @@
     function drawSnaps(){
       snapsLayer.clearLayers();
       snapData.forEach(s => {
-        const m = L.circleMarker([s.lat, s.lon], { radius: 5, weight: 2, color: cssVar('--snap','#0ea5e9'), fillOpacity:.7 });
+        const m = L.circleMarker([s.lat, s.lon], { radius: 5, weight: 2, color: cssVar('--snap','#38bdf8'), fillOpacity:.7 });
         const when = new Date(s.t).toLocaleString();
         const desc = (s.wx_desc||''); const temp = (s.temp!=null? Math.round(s.temp)+'°C':'-'); const wind = (s.wind!=null? Math.round(s.wind)+' km/h':'-');
         m.bindPopup('<strong>Snapshot</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc);
@@ -342,7 +407,7 @@
       if (snapData.length>1){
         const coords = snapData.map(s => [s.lat, s.lon]);
         L.polyline(coords, { color: '#ffffff', weight: 7, opacity: .9 }).addTo(snapsLayer);
-        L.polyline(coords, { color: cssVar('--snap','#0ea5e9'), weight: 4, opacity: 1 }).addTo(snapsLayer);
+        L.polyline(coords, { color: cssVar('--snap','#38bdf8'), weight: 4, opacity: 1 }).addTo(snapsLayer);
       }
     }
     function hoursBetween(a,b){ return Math.abs((b-a)/36e5); }
@@ -352,7 +417,7 @@
       const url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&current=temperature_2m,precipitation,wind_speed_10m,weather_code&timezone=auto';
       try {
         const res = await fetch(url); const data = await res.json();
-        const cur = data.current || {}; const codeMapLocal = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",85:"Schneeschauer 🌨️",86:"Starke Schneeschauer 🌨️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"};
+        const cur = data.current || {}; const codeMapLocal = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"};
         const rec = { t: new Date().toISOString(), lat, lon, temp: cur.temperature_2m, wind: cur.wind_speed_10m, wx_code: cur.weather_code, wx_desc: codeMapLocal[cur.weather_code] || '' };
         snapData.push(rec); saveSnaps(); drawSnaps();
         setStatus('Snapshot gespeichert.', 'ok');
@@ -366,7 +431,6 @@
       loadSnaps();
       const last = lastSnap(); const now = new Date();
       if (last && hoursBetween(new Date(last.t), now) < MIN_INTERVAL_HOURS) { setStatus('Auto‑Log übersprungen'); return; }
-      // Nur wenn bereits markMe existiert (keine Permission-Abfrage im Hintergrund)
       if (lastMe) snapshotNow(lastMe.lat, lastMe.lon);
     }
 
@@ -421,21 +485,6 @@
       } catch(e){ console.error(e); alert('Publish fehlgeschlagen:\n'+e.message); setStatus('Publish fehlgeschlagen', 'err'); throw e; }
     }
 
-    document.getElementById('autoLog').addEventListener('click', function(){
-      autoLogEnabled = !autoLogEnabled; this.classList.toggle('active', autoLogEnabled);
-      this.textContent = autoLogEnabled ? 'Auto‑Log' : 'Auto‑Log aus';
-      try { localStorage.setItem('mw-autolog', JSON.stringify(autoLogEnabled)); } catch(e){}
-      setStatus(autoLogEnabled ? 'Auto‑Log an' : 'Auto‑Log aus');
-    });
-    document.getElementById('snapExport').addEventListener('click', function(){ exportSnaps(); haptic(); });
-    document.getElementById('snapPublish').addEventListener('click', function(){ publishHistory(); haptic(); });
-    document.getElementById('autoPublish').addEventListener('click', function(){
-      autoPublishEnabled = !autoPublishEnabled; this.classList.toggle('active', autoPublishEnabled);
-      this.textContent = autoPublishEnabled ? 'Auto‑Pub' : 'Auto‑Pub aus';
-      try { localStorage.setItem('mw-autopub', JSON.stringify(autoPublishEnabled)); } catch(e){}
-      setStatus(autoPublishEnabled ? 'Auto‑Publish an' : 'Auto‑Publish aus');
-    });
-
     // ---- Published history viewer ----
     async function loadPublishedHistory(){
       try {
@@ -448,14 +497,14 @@
         if (line){
           const coords = line.geometry.coordinates.map(c => [c[1], c[0]]);
           L.polyline(coords, { color: '#ffffff', weight: 8, opacity: .9 }).addTo(histLayer);
-          L.polyline(coords, { color: cssVar('--hist','#8b5cf6'), weight: 5, opacity: 1 }).addTo(histLayer);
+          L.polyline(coords, { color: cssVar('--hist','#c084fc'), weight: 5, opacity: 1 }).addTo(histLayer);
         }
         features.filter(f => f.geometry && f.geometry.type==='Point').forEach(f => {
           const c = f.geometry.coordinates; const p = f.properties || {};
           const when = p.t ? new Date(p.t).toLocaleString() : '';
           const temp = (p.temp!=null? Math.round(p.temp)+'°C':'-'); const wind = (p.wind!=null? Math.round(p.wind)+' km/h':'-');
           const desc = p.wx_desc || '';
-          L.circleMarker([c[1], c[0]], { radius: 5, weight: 2, color: cssVar('--hist','#8b5cf6'), fillOpacity:.7 })
+          L.circleMarker([c[1], c[0]], { radius: 5, weight: 2, color: cssVar('--hist','#c084fc'), fillOpacity:.7 })
             .bindPopup('<strong>Besuch</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc).addTo(histLayer);
         });
         setStatus('Veröffentlichte Besuche geladen');
