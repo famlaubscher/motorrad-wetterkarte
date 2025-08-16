@@ -18,33 +18,49 @@
       --chip-bg: #111827; --chip-br: rgba(255,255,255,.9); --chip-shadow: 0 1px 0 rgba(0,0,0,.25);
       --route: #6b705c; --route-outline: #ffffff;
       --me: #2563eb; --btn-bg: rgba(17,24,39,.96); --btn-br: rgba(255,255,255,.9); --btn-tx: #fff;
-      --accent: #111827;
-      --snap: #0ea5e9; --hist: #8b5cf6;
+      --accent: #111827; --snap:#0ea5e9; --hist:#8b5cf6;
     }
     html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
     #map { width: 100%; height: 100vh; }
+
     .toolbar { position: absolute; left: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); top: auto; display: grid; gap: 8px; z-index: 1000; }
-    .btn { appearance: none; border: 2px solid var(--btn-br); background: var(--btn-bg); color: var(--btn-tx); border-radius: 999px; padding: 6px 10px; font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,.18); min-width: 40px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .btn { appearance: none; border: 2px solid var(--btn-br); background: var(--btn-bg); color: var(--btn-tx);
+      border-radius: 999px; padding: 6px 10px; font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,.18); min-width: 40px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     .segbtns { display:flex; gap:6px; flex-wrap: wrap; }
     .btn.pill { border-radius: 999px; padding: 5px 9px; }
     .btn.active { box-shadow: 0 6px 14px rgba(0,0,0,.22); border-color: rgba(255,255,255,1); }
-    .status { position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); left: 12px; z-index: 1000; background: rgba(255,255,255,.96); border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px 10px; font: 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: var(--muted); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+
+    .status { position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); left: 12px; z-index: 1000;
+      background: rgba(255,255,255,.96); border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px 10px;
+      font: 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: var(--muted); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
     .status.ok { border-color:#10b981; color:#065f46; } .status.warn { border-color:#f59e0b; color:#7c2d12; } .status.err { border-color:#ef4444; color:#7f1d1d; }
+
     .chip-marker { transform: translate(-50%, -34px); }
-    .chip-marker > div { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--chip-bg); color: #fff; font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; border: 2px solid var(--chip-br); box-shadow: 0 6px 16px rgba(0,0,0,.18); white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px; text-shadow: var(--chip-shadow); }
+    .chip-marker > div { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--chip-bg); color: #fff;
+      font: 700 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; border: 2px solid var(--chip-br); box-shadow: 0 6px 16px rgba(0,0,0,.18);
+      white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px; text-shadow: var(--chip-shadow); }
     .hidden { display: none !important; }
-    .fab { position: fixed; right: calc(env(safe-area-inset-right, 0px) + 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); z-index: 3000; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; font: 900 14px/1 system-ui, -apple-system, Segoe UI; border: 2px solid rgba(255,255,255,.9); box-shadow: 0 12px 24px rgba(0,0,0,.22); -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+    .fab { position: fixed; right: calc(env(safe-area-inset-right, 0px) + 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+      z-index: 3000; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff;
+      font: 900 14px/1 system-ui, -apple-system, Segoe UI; border: 2px solid rgba(255,255,255,.9); box-shadow: 0 12px 24px rgba(0,0,0,.22);
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     @supports (bottom: constant(safe-area-inset-bottom)) { .fab { right: calc(constant(safe-area-inset-right) + 14px); bottom: calc(constant(safe-area-inset-bottom) + 16px); } }
+
     .leaflet-control { border-radius: 8px; overflow: hidden; }
+
     @media (prefers-color-scheme: dark) {
       :root { --bg:#0b0f14; --text:#e5e7eb; --muted:#9ca3af; --chip-bg:#0f172a; --chip-br:rgba(255,255,255,.2); --btn-bg:#0f172a; --btn-br:rgba(255,255,255,.2); --btn-tx:#e5e7eb; --route:#94a3b8; --route-outline:#0b0f14; }
       .status { background: rgba(17,24,39,.96); border-color:#1f2937; color:#cbd5e1; }
     }
+
     @media (max-width: 480px) { .toolbar { gap: 6px; } .btn { font-size: 11px; padding: 5px 9px; } .btn.pill { padding: 4px 8px; } }
   </style>
 </head>
 <body>
   <div id="map"></div>
+
   <div class="toolbar">
     <button class="btn" id="fit">Zentrieren</button>
     <button class="btn" id="locate">Ortung</button>
@@ -59,21 +75,26 @@
       <button class="btn pill" id="autoPublish">Auto‑Pub</button>
     </div>
   </div>
+
   <button class="fab" id="fabNow" title="Jetzt-Wetter" aria-label="Jetzt-Wetter">JETZT</button>
   <div class="status" id="status">Karte lädt …</div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
+    // ---- Utilities ----
+    function setStatus(msg, cls){ var s = document.getElementById('status'); s.textContent = msg; s.className = 'status '+(cls||''); s.style.display='block'; clearTimeout(s._t); s._t = setTimeout(function(){ s.style.display='none'; }, 2200); }
+    function cssVar(name, fallback){ var v = getComputedStyle(document.documentElement).getPropertyValue(name); v = v ? v.trim() : ''; return v || fallback; }
+    function haptic(){ if (navigator.vibrate) try{ navigator.vibrate(10); }catch(e){} }
+
+    // ---- SW register ----
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', async function() {
-        try { const reg = await navigator.serviceWorker.register('./sw.js'); setTimeout(()=>reg.update().catch(()=>{}), 2000); }
-        catch(e){ console.warn('SW reg fail', e); }
+        try { const reg = await navigator.serviceWorker.register('./sw.js'); setTimeout(()=>reg.update().catch(()=>{}), 1500); } catch(e){ console.warn('SW reg fail', e); }
       });
     }
-    function setStatus(msg, cls){ var s = document.getElementById('status'); s.textContent = msg; s.className = 'status '+(cls||''); s.style.display='block'; clearTimeout(s._t); s._t = setTimeout(function(){ s.style.display='none'; }, 2000); }
-    function cssVar(name, fallback){ var v = getComputedStyle(document.documentElement).getPropertyValue(name); v = v ? v.trim() : ''; return v || fallback; }
 
+    // ---- Basemap (light/dark auto) ----
     const lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {maxZoom:19, attribution:'&copy; OSM & CARTO'});
     const darkTiles  = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  {maxZoom:19, attribution:'&copy; OSM & CARTO'});
     const map = L.map('map');
@@ -83,46 +104,25 @@
     window.addEventListener('load', function(){ setTimeout(function(){ map.invalidateSize(); }, 150); });
     if (mq) {
       const handler = (e) => { map.removeLayer(lightTiles); map.removeLayer(darkTiles); map.addLayer(e.matches ? darkTiles : lightTiles); };
-      if (mq.addEventListener) mq.addEventListener('change', handler); else if (mq.addListener) mq.addListener(handler);
+      (mq.addEventListener ? mq.addEventListener('change', handler) : mq.addListener(handler));
     }
 
+    // ---- Online/offline note ----
     function showNetStatus(){ setStatus(navigator.onLine ? 'Online' : 'Offline – Cache aktiv', navigator.onLine ? 'ok' : 'warn'); }
     window.addEventListener('online', showNetStatus); window.addEventListener('offline', showNetStatus); showNetStatus();
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistration().then(reg => {
-        if (!reg) return;
-        reg.addEventListener('updatefound', () => {
-          const sw = reg.installing; if (!sw) return;
-          sw.addEventListener('statechange', () => {
-            if (sw.state === 'installed' && navigator.serviceWorker.controller) {
-              const b = document.createElement('button');
-              b.className = 'btn pill'; b.style.position='fixed'; b.style.right='14px';
-              b.style.bottom='calc(env(safe-area-inset-bottom,0px)+16px)';
-              b.textContent = 'Aktualisieren';
-              b.onclick = () => { try { reg.waiting?.postMessage({type:'SKIP_WAITING'}); } catch(e){} location.reload(); };
-              document.body.appendChild(b);
-              setStatus('Update verfügbar – ggf. App neu starten', 'ok');
-            }
-          });
-        });
-        if (reg.waiting) {
-          const b = document.createElement('button');
-          b.className = 'btn pill'; b.style.position='fixed'; b.style.right='14px';
-          b.style.bottom='calc(env(safe-area-inset-bottom,0px)+16px)';
-          b.textContent = 'Aktualisieren';
-          b.onclick = () => { try { reg.waiting?.postMessage({type:'SKIP_WAITING'}); } catch(e){} location.reload(); };
-          document.body.appendChild(b);
-          setStatus('Update verfügbar – ggf. App neu starten', 'ok');
-        }
-      });
-    }
-
+    // ---- Buttons ----
     document.getElementById('fit').addEventListener('click', function(){ fitRoute(); haptic(); });
     document.getElementById('locate').addEventListener('click', function(){ locateMe(true); haptic(); });
     document.getElementById('fabNow').addEventListener('click', function(){ locateMe(true, true); haptic(); });
-    document.getElementById('share').addEventListener('click', async function(){ haptic(); const url = location.href; if (navigator.share) { try { await navigator.share({ title: document.title, url: url }); } catch(e){} } else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } } });
+    document.getElementById('share').addEventListener('click', async function(){
+      haptic();
+      const url = location.href;
+      if (navigator.share) { try { await navigator.share({ title: document.title, url: url }); } catch(e){} }
+      else { try { await navigator.clipboard.writeText(url); alert('Link kopiert.'); } catch(e){ alert(url); } }
+    });
 
+    // ---- Mode (persist) ----
     var modeBtns = { today: document.getElementById('modeToday'), tomorrow: document.getElementById('modeTomorrow'), dayAfter: document.getElementById('modeDayAfter') };
     var mode = 'today';
     function applyModeUI() { for (var k in modeBtns) modeBtns[k].classList.toggle('active', (k===mode)); }
@@ -133,8 +133,7 @@
     modeBtns.tomorrow.addEventListener('click', function(){ setMode('tomorrow', true); haptic(); });
     modeBtns.dayAfter.addEventListener('click', function(){ setMode('dayAfter', true); haptic(); });
 
-    function haptic(){ if (navigator.vibrate) try{ navigator.vibrate(10); }catch(e){} }
-
+    // ---- Route points ----
     const points = [
       { name: "Grosshöchstetten (CH)", lat: 46.906, lon: 7.638 },
       { name: "Interlaken (CH)",       lat: 46.686, lon: 7.863 },
@@ -156,6 +155,7 @@
     ];
     function stripCountry(s){ return s.replace(/\s*\([A-Z]{2}\)\s*$/, ''); }
 
+    // ---- Markers with declutter ----
     var markers = [];
     points.forEach(function(p){
       var m = L.marker([p.lat, p.lon], { icon: L.divIcon({ className:'chip-marker', html:'<div>'+stripCountry(p.name)+'</div>', iconSize:[10,10], iconAnchor:[10,24], popupAnchor:[0,-20] })}).addTo(map);
@@ -165,21 +165,32 @@
     function setMarkerVisibility(){ const z = map.getZoom(); markers.forEach(({marker}) => { const el = marker.getElement(); if (!el) return; if (z >= 7) el.classList.remove('hidden'); else el.classList.add('hidden'); }); }
     map.on('zoomend', setMarkerVisibility); setTimeout(setMarkerVisibility, 400);
 
+    // ---- Fallback polyline ----
     var latlngs = points.map(function(p){ return [p.lat, p.lon]; });
     var fallbackGroup = L.layerGroup().addTo(map);
     L.polyline(latlngs, { color: '#ffffff', weight: 8, opacity: .95, dashArray: '8 10' }).addTo(fallbackGroup);
     L.polyline(latlngs, { color: '#6b7280', weight: 4, opacity: .95, dashArray: '8 10' }).addTo(fallbackGroup);
     map.fitBounds(L.latLngBounds(latlngs), { padding: [24,24] });
 
+    // ---- Route drawing ----
     var routeGroup = L.layerGroup().addTo(map);
     var routeBounds = null; var routeCoords = null;
-    function drawCased(coords, color, outline){ L.polyline(coords, { color: outline || cssVar('--route-outline','#ffffff'), weight: 9, opacity: 0.95 }).addTo(routeGroup); L.polyline(coords, { color: color, weight: 6, opacity: 1.0 }).addTo(routeGroup); }
+    function drawCased(coords, color, outline){
+      L.polyline(coords, { color: outline || cssVar('--route-outline','#ffffff'), weight: 9, opacity: 0.95 }).addTo(routeGroup);
+      L.polyline(coords, { color: color, weight: 6, opacity: 1.0 }).addTo(routeGroup);
+    }
 
-    const GPX_FILES = ['gpx/stegra_route_tag_1.gpx','gpx/stegra_route_tag_2.gpx','gpx/stegra_route_tag_3.gpx','gpx/stegra_route_tag_4.gpx','gpx/stegra_route_tag_5_1.gpx','gpx/stegra_route_tag_5_2.gpx'];
-
-    function parseGPX(xmlText){ const doc = new DOMParser().parseFromString(xmlText, 'text/xml'); let pts = Array.from(doc.getElementsByTagName('trkpt')); if (pts.length === 0) pts = Array.from(doc.getElementsByTagName('rtept')); const coords = []; for (const el of pts){ const lat = parseFloat(el.getAttribute('lat')); const lon = parseFloat(el.getAttribute('lon')); if (!isNaN(lat) && !isNaN(lon)) coords.push([lat, lon]); } return coords; }
+    // ---- GPX support ----
+    const GPX_FILES = [
+      'gpx/stegra_route_tag_1.gpx','gpx/stegra_route_tag_2.gpx','gpx/stegra_route_tag_3.gpx',
+      'gpx/stegra_route_tag_4.gpx','gpx/stegra_route_tag_5_1.gpx','gpx/stegra_route_tag_5_2.gpx'
+    ];
+    function parseGPX(xmlText){
+      const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+      let pts = Array.from(doc.getElementsByTagName('trkpt')); if (pts.length === 0) pts = Array.from(doc.getElementsByTagName('rtept'));
+      const coords = []; for (const el of pts){ const lat = parseFloat(el.getAttribute('lat')); const lon = parseFloat(el.getAttribute('lon')); if (!isNaN(lat) && !isNaN(lon)) coords.push([lat, lon]); } return coords;
+    }
     function downsample(coords, maxPoints){ if (!coords || coords.length <= maxPoints) return coords; const step = Math.ceil(coords.length / maxPoints); const out = []; for (let i=0;i<coords.length;i+=step) out.push(coords[i]); if (coords.length % step !== 0) out.push(coords[coords.length-1]); return out; }
-
     async function loadGPX(){
       if (!GPX_FILES || GPX_FILES.length === 0) return false;
       setStatus('Lade GPX-Tracks …');
@@ -196,22 +207,40 @@
       setStatus('GPX-Route geladen ('+merged.length+' Punkte).', 'ok'); return true;
     }
 
-    function decodePolyline6(str){ var index = 0, lat = 0, lon = 0, coords = []; var factor = 1e-6; while (index < str.length) { var b, res = 0, sh = 0; do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20); var dlat = (res & 1) ? ~(res >> 1) : (res >> 1); lat += dlat; res = 0; sh = 0; do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20); var dlon = (res & 1) ? ~(res >> 1) : (res >> 1); lon += dlon; coords.push([lat * factor, lon * factor]); } return coords; }
+    // ---- OSRM fallback ----
+    function decodePolyline6(str){
+      var index = 0, lat = 0, lon = 0, coords = []; var factor = 1e-6;
+      while (index < str.length) {
+        var b, res = 0, sh = 0; do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
+        var dlat = (res & 1) ? ~(res >> 1) : (res >> 1); lat += dlat;
+        res = 0; sh = 0; do { b = str.charCodeAt(index++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
+        var dlon = (res & 1) ? ~(res >> 1) : (res >> 1); lon += dlon; coords.push([lat * factor, lon * factor]);
+      }
+      return coords;
+    }
     function osrmUrlAll(points) { var coords = points.map(function(p){ return p.lon+','+p.lat; }).join(';'); return 'https://router.project-osrm.org/route/v1/driving/'+coords+'?overview=full&geometries=polyline6&alternatives=false&steps=false&continue_straight=true'; }
     async function fetchWithTimeout(url, ms){ const ctrl = new AbortController(); const id = setTimeout(function(){ ctrl.abort(); }, ms); try { const res = await fetch(url, { signal: ctrl.signal }); return res; } finally { clearTimeout(id); } }
-
     (async function initRoute(){
       const ok = await loadGPX(); if (ok) return;
-      try { const res = await fetchWithTimeout(osrmUrlAll(points), 8000); if (!res.ok) throw new Error('OSRM '+res.status); const data = await res.json(); if (!data.routes || !data.routes[0]) throw new Error('Keine Route'); const coords = decodePolyline6(data.routes[0].geometry).map(function(x){ return [x[0], x[1]]; }); drawCased(coords, cssVar('--route','#6b705c')); routeCoords = coords; routeBounds = L.latLngBounds(coords); map.removeLayer(fallbackGroup); setStatus('OSRM-Route geladen.', 'ok'); }
-      catch(e){ console.warn('OSRM Problem', e); setStatus('Zeige Fallback (Straßenroute nicht geladen).', 'warn'); }
+      try {
+        const res = await fetchWithTimeout(osrmUrlAll(points), 8000); if (!res.ok) throw new Error('OSRM '+res.status);
+        const data = await res.json(); if (!data.routes || !data.routes[0]) throw new Error('Keine Route');
+        const coords = decodePolyline6(data.routes[0].geometry).map(function(x){ return [x[0], x[1]]; });
+        drawCased(coords, cssVar('--route','#6b705c')); routeCoords = coords; routeBounds = L.latLngBounds(coords);
+        map.removeLayer(fallbackGroup); setStatus('OSRM-Route geladen.', 'ok');
+      } catch(e){ console.warn('OSRM Problem', e); setStatus('Zeige Fallback (Straßenroute nicht geladen).', 'warn'); }
     })();
 
+    // ---- Wetter / Popups ----
     function windyLink(lat, lon){ var z=8; return 'https://www.windy.com/'+lat.toFixed(3)+'/'+lon.toFixed(3)+'?'+lat.toFixed(3)+','+lon.toFixed(3)+','+z; }
     var codeMap = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",85:"Schneeschauer 🌨️",86:"Starke Schneeschauer 🌨️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"};
     function fmt(n, unit){ return (n==null || isNaN(n)) ? '-' : (Math.round(n)+(unit||'')); }
     async function loadPopupForPoint(p, marker) { await loadPopupGeneric(p.name, p.lat, p.lon, marker); }
     async function loadPopupGeneric(label, lat, lon, marker) {
-      var url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon + '&current=temperature_2m,precipitation,wind_speed_10m,weather_code' + '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code' + '&timezone=auto';
+      var url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon
+              + '&current=temperature_2m,precipitation,wind_speed_10m,weather_code'
+              + '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code'
+              + '&timezone=auto';
       try {
         const res = await fetch(url); const data = await res.json();
         var cur = data.current || {}; var d = data.daily || {};
@@ -222,63 +251,277 @@
         var maxT = d.temperature_2m_max && d.temperature_2m_max[idx];
         var minT = d.temperature_2m_min && d.temperature_2m_min[idx];
         var pop  = d.precipitation_probability_max && d.precipitation_probability_max[idx];
-        var html = '<div>' + '<strong>'+label+'</strong><br/>' + '<div style="margin:4px 0 6px;"><em>'+dayLabel+'</em>: <strong>Max '+fmt(maxT,'°C')+'</strong> · Min '+fmt(minT,'°C')+' · Regenwkt. '+(pop==null?'-':pop+'%')+' · '+wxDescDay+'</div>' + '<div style="font-size:12px;color:var(--muted);">Jetzt: '+fmt(cur.temperature_2m,'°C')+' · Wind '+fmt(cur.wind_speed_10m,' km/h')+' · '+(codeMap[cur.weather_code] || '–')+'</div>' + '<a href="'+windyLink(lat, lon)+'" target="_blank" rel="noopener">Details auf Windy öffnen</a>' + '</div>';
+        var html = '<div>' +
+          '<strong>'+label+'</strong><br/>' +
+          '<div style="margin:4px 0 6px;"><em>'+dayLabel+'</em>: <strong>Max '+fmt(maxT,'°C')+'</strong> · Min '+fmt(minT,'°C')+' · Regenwkt. '+(pop==null?'-':pop+'%')+' · '+wxDescDay+'</div>' +
+          '<div style="font-size:12px;color:var(--muted);">Jetzt: '+fmt(cur.temperature_2m,'°C')+' · Wind '+fmt(cur.wind_speed_10m,' km/h')+' · '+(codeMap[cur.weather_code] || '–')+'</div>' +
+          '<a href="'+windyLink(lat, lon)+'" target="_blank" rel="noopener">Details auf Windy öffnen</a>' +
+        '</div>';
         marker.bindPopup(html).openPopup();
-      } catch(e) { marker.bindPopup('<div><strong>'+label+'</strong><br/><span style="color:var(--muted);">Wetter gerade nicht erreichbar.</span></div>').openPopup(); }
+      } catch(e) {
+        marker.bindPopup('<div><strong>'+label+'</strong><br/><span style="color:var(--muted);">Wetter gerade nicht erreichbar.</span></div>').openPopup();
+      }
     }
 
+    // ---- Geolocation helpers (robust for iOS PWAs) ----
     var meMarker = null; var lastMe = null;
+
+    function showGeoError(err){
+      var msg = 'Standortfehler';
+      if (!err) msg = 'Standortfehler (unbekannt)';
+      else if (err.code === 1) msg = 'Ortung abgelehnt – erlauben in: Einstellungen ▸ Datenschutz ▸ Ortungsdienste ▸ „Moto Wetter“ ▸ Beim Verwenden + Genauer Standort';
+      else if (err.code === 2) msg = 'Ortung nicht verfügbar (kein Fix) – bitte Mobilfunk/GPS aktivieren, freie Sicht, kurz warten';
+      else if (err.code === 3) msg = 'Ortung Timeout – nochmals versuchen';
+      else msg = 'Ortung: '+(err.message||'Fehler');
+      setStatus(msg, 'warn');
+    }
+
     function markMe(lat, lon, recenter){
-      lastMe = {lat, lon};
-      if (meMarker) { map.removeLayer(meMarker); }
-      meMarker = L.circleMarker([lat, lon], { radius: 6, weight: 2, color: cssVar('--me','#2563eb'), fillOpacity: .6 }).addTo(map);
+      lastMe = {lat:+lat, lon:+lon};
+      if (meMarker) map.removeLayer(meMarker);
+      meMarker = L.circleMarker([+lat, +lon], { radius: 6, weight: 2, color: cssVar('--me','#2563eb'), fillOpacity: .6 }).addTo(map);
       meMarker.bindPopup('Lade Wetter…').openPopup();
-      meMarker.on('click', function(){ meMarker.bindPopup('Lade Wetter…').openPopup(); loadPopupGeneric('Dein Standort', lat, lon, meMarker); });
-      loadPopupGeneric('Dein Standort', lat, lon, meMarker);
-      if (recenter) { if (routeBounds){ var inside = routeBounds.contains([lat, lon]); if (inside){ map.setView([lat, lon], 11); } else { var combo = routeBounds.pad(0); combo.extend([lat, lon]); map.fitBounds(combo, { padding: [28,28] }); } } else { map.setView([lat, lon], 11); } }
+      meMarker.on('click', function(){ meMarker.bindPopup('Lade Wetter…').openPopup(); loadPopupGeneric('Dein Standort', +lat, +lon, meMarker); });
+      loadPopupGeneric('Dein Standort', +lat, +lon, meMarker);
+      if (recenter) {
+        if (routeBounds){
+          var inside = routeBounds.contains(L.latLng(+lat, +lon));
+          if (inside){ map.setView([+lat, +lon], 11); }
+          else { var combo = routeBounds.pad(0); combo.extend([+lat, +lon]); map.fitBounds(combo, { padding: [28,28] }); }
+        } else { map.setView([+lat, +lon], 11); }
+      }
     }
-    function locateMe(userAction, forceRecenter){
-      var status = document.getElementById('status'); status.style.display='block'; status.textContent = 'Bestimme deinen Standort …';
-      if (!navigator.geolocation) { status.textContent = 'Geolocation nicht verfügbar.'; return; }
-      navigator.geolocation.getCurrentPosition(function(pos){
-        var latitude = pos.coords.latitude, longitude = pos.coords.longitude;
-        markMe(latitude, longitude, true);
+
+    function requestGeoOnce(opts){
+      opts = Object.assign({enableHighAccuracy:true, timeout:8000, maximumAge:0}, opts||{});
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) { reject({code:2, message:'Geolocation nicht verfügbar'}); return; }
+        let settled = false;
+        // Primary: getCurrentPosition
+        navigator.geolocation.getCurrentPosition(
+          pos => { if (settled) return; settled = true; resolve(pos); },
+          err => {
+            // Fallback: quick watchPosition
+            if (settled) return;
+            let watchId = null;
+            const onWatch = (p) => { if (settled) return; settled = true; try{ navigator.geolocation.clearWatch(watchId);}catch(e){} resolve(p); };
+            try { watchId = navigator.geolocation.watchPosition(onWatch, e => {}, { enableHighAccuracy:true, maximumAge:0, timeout:12000 }); } catch(e){}
+            setTimeout(() => {
+              if (settled) return;
+              try{ navigator.geolocation.clearWatch(watchId);}catch(e){}
+              reject(err || {code:3, message:'Timeout'});
+            }, 12000);
+          },
+          opts
+        );
+      });
+    }
+
+    async function locateMe(userAction, recenter){
+      const status = document.getElementById('status');
+      status.style.display='block'; status.textContent = 'Bestimme deinen Standort …';
+      try {
+        // If browser supports Permissions API, hint user proactively
+        if (navigator.permissions && navigator.permissions.query) {
+          try {
+            const st = await navigator.permissions.query({name:'geolocation'});
+            if (st.state === 'denied') {
+              throw {code:1, message:'Permission denied'};
+            }
+          } catch(e){ /* ignore */ }
+        }
+        const pos = await requestGeoOnce({ enableHighAccuracy:true, timeout: 10000, maximumAge: 0 });
+        const lat = pos.coords.latitude, lon = pos.coords.longitude;
+        markMe(lat, lon, true);
         status.textContent = 'Zentriert.'; setTimeout(function(){ status.style.display='none'; }, 1600);
-      }, function(err){
-        console.warn('Geo-Error', err); status.textContent = 'Standort nicht erlaubt – zeige Route.'; fitRoute(); setTimeout(function(){ status.style.display='none'; }, 1800);
-      }, { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 });
+      } catch(err){
+        console.warn('Geo-Error', err);
+        showGeoError(err);
+        fitRoute();
+        setTimeout(function(){ status.style.display='none'; }, 2000);
+      }
     }
 
-    setInterval(function(){ if (document.visibilityState === 'visible' && lastMe && meMarker) { loadPopupGeneric('Dein Standort', lastMe.lat, lastMe.lon, meMarker); setStatus('Wetter aktualisiert'); } }, 20 * 60 * 1000);
-    function fitRoute(){ var b = routeBounds || L.latLngBounds(latlngs); map.fitBounds(b, { padding: [24,24] }); setStatus('Route zentriert.', 'ok'); }
+    // ---- Auto-refresh Wetter ----
+    setInterval(function(){
+      if (document.visibilityState === 'visible' && lastMe && meMarker) {
+        loadPopupGeneric('Dein Standort', lastMe.lat, lastMe.lon, meMarker);
+        setStatus('Wetter aktualisiert');
+      }
+    }, 20 * 60 * 1000);
 
-    const SNAP_KEY = 'mw-snaps-v1'; let snapData = []; let snapsLayer = L.layerGroup().addTo(map);
+    // ---- Snapshot + Publish (unchanged from previous v2) ----
+    const SNAP_KEY = 'mw-snaps-v1';
+    let snapData = []; let snapsLayer = L.layerGroup().addTo(map);
     let autoLogEnabled = true; let autoPublishEnabled = false; const MIN_INTERVAL_HOURS = 3;
     function loadSnaps(){ try { snapData = JSON.parse(localStorage.getItem(SNAP_KEY) || '[]'); } catch(e){ snapData=[]; } }
     function saveSnaps(){ try { localStorage.setItem(SNAP_KEY, JSON.stringify(snapData)); } catch(e){} }
-    function drawSnaps(){ snapsLayer.clearLayers(); snapData.forEach(s => { const m = L.circleMarker([s.lat, s.lon], { radius: 5, weight: 2, color: cssVar('--snap','#0ea5e9'), fillOpacity:.7 }); const when = new Date(s.t).toLocaleString(); const desc = (s.wx_desc||''); const temp = (s.temp!=null? Math.round(s.temp)+'°C':'-'); const wind = (s.wind!=null? Math.round(s.wind)+' km/h':'-'); m.bindPopup('<strong>Snapshot</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc); m.addTo(snapsLayer); }); if (snapData.length>1){ const coords = snapData.map(s => [s.lat, s.lon]); L.polyline(coords, { color: '#ffffff', weight: 7, opacity: .9 }).addTo(snapsLayer); L.polyline(coords, { color: cssVar('--snap','#0ea5e9'), weight: 4, opacity: 1 }).addTo(snapsLayer); } }
+    function drawSnaps(){
+      snapsLayer.clearLayers();
+      snapData.forEach(s => {
+        const m = L.circleMarker([s.lat, s.lon], { radius: 5, weight: 2, color: cssVar('--snap','#0ea5e9'), fillOpacity:.7 });
+        const when = new Date(s.t).toLocaleString();
+        const desc = (s.wx_desc||''); const temp = (s.temp!=null? Math.round(s.temp)+'°C':'-'); const wind = (s.wind!=null? Math.round(s.wind)+' km/h':'-');
+        m.bindPopup('<strong>Snapshot</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc);
+        m.addTo(snapsLayer);
+      });
+      if (snapData.length>1){
+        const coords = snapData.map(s => [s.lat, s.lon]);
+        L.polyline(coords, { color: '#ffffff', weight: 7, opacity: .9 }).addTo(snapsLayer);
+        L.polyline(coords, { color: cssVar('--snap','#0ea5e9'), weight: 4, opacity: 1 }).addTo(snapsLayer);
+      }
+    }
     function hoursBetween(a,b){ return Math.abs((b-a)/36e5); }
     function lastSnap(){ return snapData.length? snapData[snapData.length-1]: null; }
-    async function snapshotNow(lat, lon){ const url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&current=temperature_2m,precipitation,wind_speed_10m,weather_code&timezone=auto'; try { const res = await fetch(url); const data = await res.json(); const cur = data.current || {}; const codeMapLocal = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",85:"Schneeschauer 🌨️",86:"Starke Schneeschauer 🌨️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"}; const rec = { t: new Date().toISOString(), lat, lon, temp: cur.temperature_2m, wind: cur.wind_speed_10m, wx_code: cur.weather_code, wx_desc: codeMapLocal[cur.weather_code] || '' }; snapData.push(rec); saveSnaps(); drawSnaps(); setStatus('Snapshot gespeichert.', 'ok'); if (autoPublishEnabled) { try { await publishHistory(); } catch(e){ setStatus('Auto‑Publish fehlgeschlagen', 'warn'); } } } catch(e){ setStatus('Snapshot: Wetter nicht erreichbar', 'warn'); } }
-    async function tryAutoSnapshot(){ try { const saved = JSON.parse(localStorage.getItem('mw-autolog')||'true'); autoLogEnabled = !!saved; } catch(e){} if (!autoLogEnabled) return; loadSnaps(); const last = lastSnap(); const now = new Date(); if (last && hoursBetween(new Date(last.t), now) < MIN_INTERVAL_HOURS) { setStatus('Auto‑Log übersprungen'); return; } if (lastMe){ snapshotNow(lastMe.lat, lastMe.lon); } else if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(function(pos){ snapshotNow(pos.coords.latitude, pos.coords.longitude); }, function(err){ console.warn('AutoSnapshot Geo-Error', err); }, { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }); } }
-    function buildHistoryJSON(){ const fc = { type: 'FeatureCollection', generatedAt: new Date().toISOString(), features: [ { type:'Feature', geometry:{ type:'LineString', coordinates: snapData.map(s => [s.lon, s.lat]) }, properties:{ kind:'snapline', points:snapData.length } }, ...snapData.map(s => ({ type:'Feature', geometry:{ type:'Point', coordinates:[s.lon, s.lat] }, properties:{ t:s.t, temp:s.temp, wind:s.wind, wx_code:s.wx_code, wx_desc:s.wx_desc } })) ] }; return JSON.stringify(fc, null, 2); }
+
+    async function snapshotNow(lat, lon){
+      const url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&current=temperature_2m,precipitation,wind_speed_10m,weather_code&timezone=auto';
+      try {
+        const res = await fetch(url); const data = await res.json();
+        const cur = data.current || {}; const codeMapLocal = {0:"Klar ☀️",1:"Überwiegend klar 🌤️",2:"Wechselhaft ⛅",3:"Bedeckt ☁️",45:"Nebel 🌫️",48:"Reif/Nebel 🌫️",51:"Nieselregen 🌦️",53:"Nieselregen 🌦️",55:"Nieselregen 🌦️",56:"Gefrierender Niesel 🌧️❄️",57:"Gefrierender Niesel 🌧️❄️",61:"Regen 🌧️",63:"Regen 🌧️",65:"Starker Regen 🌧️",66:"Gefrierender Regen 🌧️❄️",67:"Gefrierender Regen 🌧️❄️",71:"Schnee 🌨️",73:"Schnee 🌨️",75:"Starker Schnee 🌨️",77:"Schneegriesel 🌨️",80:"Schauer 🌦️",81:"Schauer 🌦️",82:"Starke Schauer 🌧️",85:"Schneeschauer 🌨️",86:"Starke Schneeschauer 🌨️",95:"Gewitter ⛈️",96:"Gewitter mit Hagel ⛈️",97:"Gewitter mit Hagel ⛈️"};
+        const rec = { t: new Date().toISOString(), lat, lon, temp: cur.temperature_2m, wind: cur.wind_speed_10m, wx_code: cur.weather_code, wx_desc: codeMapLocal[cur.weather_code] || '' };
+        snapData.push(rec); saveSnaps(); drawSnaps();
+        setStatus('Snapshot gespeichert.', 'ok');
+        if (autoPublishEnabled) { try { await publishHistory(); } catch(e){ setStatus('Auto‑Publish fehlgeschlagen', 'warn'); } }
+      } catch(e){ setStatus('Snapshot: Wetter nicht erreichbar', 'warn'); }
+    }
+
+    async function tryAutoSnapshot(){
+      try { const saved = JSON.parse(localStorage.getItem('mw-autolog')||'true'); autoLogEnabled = !!saved; } catch(e){}
+      if (!autoLogEnabled) return;
+      loadSnaps();
+      const last = lastSnap(); const now = new Date();
+      if (last && hoursBetween(new Date(last.t), now) < MIN_INTERVAL_HOURS) { setStatus('Auto‑Log übersprungen'); return; }
+      // Nur Auto-Snapshot, wenn bereits erlaubt (keine neue Abfrage ohne Tap)
+      if (navigator.permissions && navigator.permissions.query) {
+        try {
+          const st = await navigator.permissions.query({name:'geolocation'});
+          if (st.state === 'granted') {
+            locateMe(false);
+          } else {
+            setStatus('Ortung tippen, um Snapshot zu speichern');
+          }
+          return;
+        } catch(e){ /* ignore */ }
+      }
+      // Fallback: nicht automatisch fragen, um iOS nicht zu nerven
+      setStatus('Ortung tippen, um Snapshot zu speichern');
+    }
+
+    function buildHistoryJSON(){
+      const fc = {
+        type: 'FeatureCollection',
+        generatedAt: new Date().toISOString(),
+        features: [
+          { type:'Feature', geometry:{ type:'LineString', coordinates: snapData.map(s => [s.lon, s.lat]) }, properties:{ kind:'snapline', points:snapData.length } },
+          ...snapData.map(s => ({ type:'Feature', geometry:{ type:'Point', coordinates:[s.lon, s.lat] }, properties:{ t:s.t, temp:s.temp, wind:s.wind, wx_code:s.wx_code, wx_desc:s.wx_desc } }))
+        ]
+      };
+      return JSON.stringify(fc, null, 2);
+    }
     function exportSnaps(){ if (!snapData.length){ alert('Keine Snapshots vorhanden.'); return; } const json = buildHistoryJSON(); const blob = new Blob([json], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'history.json'; a.click(); URL.revokeObjectURL(a.href); setStatus('Export erstellt (history.json)', 'ok'); }
-    function loadGhCfg(){ try { return JSON.parse(localStorage.getItem('mw-gh')||'{}'); } catch(e){ return {}; } } function saveGhCfg(cfg){ try { localStorage.setItem('mw-gh', JSON.stringify(cfg)); } catch(e){} } function base64Encode(str){ return btoa(unescape(encodeURIComponent(str))); }
-    async function getFileSha(owner, repo, branch, path, token){ const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`; const res = await fetch(url, { headers: { 'Accept':'application/vnd.github+json','Authorization': 'Bearer '+token,'X-GitHub-Api-Version': '2022-11-28','User-Agent': 'MotoWetter' }}); if (res.status === 404) return null; if (!res.ok) throw new Error('Get SHA: '+res.status); const data = await res.json(); return data.sha || null; }
-    async function putFile(owner, repo, branch, path, token, content, message, sha){ const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`; const body = { message, content: base64Encode(content), branch }; if (sha) body.sha = sha; const res = await fetch(url, { method:'PUT', headers: { 'Accept':'application/vnd.github+json','Authorization': 'Bearer '+token,'X-GitHub-Api-Version': '2022-11-28','User-Agent':'MotoWetter' }, body: JSON.stringify(body) }); if (!res.ok) { const t = await res.text(); throw new Error('PUT failed: '+res.status+' '+t); } return res.json(); }
-    async function publishHistory(){ if (!snapData.length){ alert('Keine Snapshots vorhanden.'); return; } let cfg = loadGhCfg(); if (!cfg.owner || !cfg.repo || !cfg.branch || !cfg.token){ cfg.owner = prompt('GitHub Benutzername (owner):', cfg.owner||''); cfg.repo = prompt('Repository-Name:', cfg.repo||''); cfg.branch = prompt('Branch (z. B. main):', cfg.branch||'main'); cfg.token = prompt('GitHub Token (fine-grained, Contents: Read & write, nur für dieses Repo):', cfg.token||''); if (!cfg.owner || !cfg.repo || !cfg.branch || !cfg.token) { setStatus('Publish abgebrochen'); return; } saveGhCfg(cfg); } const path = 'history/history.json'; const message = 'Update history.json ('+(new Date()).toISOString()+')'; try { setStatus('Veröffentliche …'); const sha = await getFileSha(cfg.owner, cfg.repo, cfg.branch, path, cfg.token); const res = await putFile(cfg.owner, cfg.repo, cfg.branch, path, cfg.token, buildHistoryJSON(), message, sha); setStatus('Veröffentlicht ✓', 'ok'); return res; } catch(e){ console.error(e); alert('Publish fehlgeschlagen:\n'+e.message); setStatus('Publish fehlgeschlagen', 'err'); throw e; } }
-    document.getElementById('autoLog').addEventListener('click', function(){ autoLogEnabled = !autoLogEnabled; this.classList.toggle('active', autoLogEnabled); this.textContent = autoLogEnabled ? 'Auto‑Log' : 'Auto‑Log aus'; try { localStorage.setItem('mw-autolog', JSON.stringify(autoLogEnabled)); } catch(e){} setStatus(autoLogEnabled ? 'Auto‑Log an' : 'Auto‑Log aus'); });
+
+    function loadGhCfg(){ try { return JSON.parse(localStorage.getItem('mw-gh')||'{}'); } catch(e){ return {}; } }
+    function saveGhCfg(cfg){ try { localStorage.setItem('mw-gh', JSON.stringify(cfg)); } catch(e){} }
+    function base64Encode(str){ return btoa(unescape(encodeURIComponent(str))); }
+    async function getFileSha(owner, repo, branch, path, token){
+      const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`;
+      const res = await fetch(url, { headers: { 'Accept':'application/vnd.github+json','Authorization': 'Bearer '+token,'X-GitHub-Api-Version': '2022-11-28','User-Agent': 'MotoWetter' }});
+      if (res.status === 404) return null; if (!res.ok) throw new Error('Get SHA: '+res.status);
+      const data = await res.json(); return data.sha || null;
+    }
+    async function putFile(owner, repo, branch, path, token, content, message, sha){
+      const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+      const body = { message, content: base64Encode(content), branch }; if (sha) body.sha = sha;
+      const res = await fetch(url, { method:'PUT', headers: { 'Accept':'application/vnd.github+json','Authorization': 'Bearer '+token,'X-GitHub-Api-Version': '2022-11-28','User-Agent':'MotoWetter' }, body: JSON.stringify(body) });
+      if (!res.ok) { const t = await res.text(); throw new Error('PUT failed: '+res.status+' '+t); }
+      return res.json();
+    }
+    async function publishHistory(){
+      if (!snapData.length){ alert('Keine Snapshots vorhanden.'); return; }
+      let cfg = loadGhCfg();
+      if (!cfg.owner || !cfg.repo || !cfg.branch || !cfg.token){
+        cfg.owner = prompt('GitHub Benutzername (owner):', cfg.owner||'');
+        cfg.repo = prompt('Repository-Name:', cfg.repo||'');
+        cfg.branch = prompt('Branch (z. B. main):', cfg.branch||'main');
+        cfg.token = prompt('GitHub Token (fine-grained, Contents: Read & write, nur für dieses Repo):', cfg.token||'');
+        if (!cfg.owner || !cfg.repo || !cfg.branch || !cfg.token) { setStatus('Publish abgebrochen'); return; }
+        saveGhCfg(cfg);
+      }
+      const path = 'history/history.json';
+      const message = 'Update history.json ('+(new Date()).toISOString()+')';
+      try {
+        setStatus('Veröffentliche …');
+        const sha = await getFileSha(cfg.owner, cfg.repo, cfg.branch, path, cfg.token);
+        const res = await putFile(cfg.owner, cfg.repo, cfg.branch, path, cfg.token, buildHistoryJSON(), message, sha);
+        setStatus('Veröffentlicht ✓', 'ok');
+        return res;
+      } catch(e){ console.error(e); alert('Publish fehlgeschlagen:\n'+e.message); setStatus('Publish fehlgeschlagen', 'err'); throw e; }
+    }
+
+    document.getElementById('autoLog').addEventListener('click', function(){
+      autoLogEnabled = !autoLogEnabled; this.classList.toggle('active', autoLogEnabled);
+      this.textContent = autoLogEnabled ? 'Auto‑Log' : 'Auto‑Log aus';
+      try { localStorage.setItem('mw-autolog', JSON.stringify(autoLogEnabled)); } catch(e){}
+      setStatus(autoLogEnabled ? 'Auto‑Log an' : 'Auto‑Log aus');
+    });
     document.getElementById('snapExport').addEventListener('click', function(){ exportSnaps(); haptic(); });
     document.getElementById('snapPublish').addEventListener('click', function(){ publishHistory(); haptic(); });
-    document.getElementById('autoPublish').addEventListener('click', function(){ autoPublishEnabled = !autoPublishEnabled; this.classList.toggle('active', autoPublishEnabled); this.textContent = autoPublishEnabled ? 'Auto‑Pub' : 'Auto‑Pub aus'; try { localStorage.setItem('mw-autopub', JSON.stringify(autoPublishEnabled)); } catch(e){} setStatus(autoPublishEnabled ? 'Auto‑Publish an' : 'Auto‑Publish aus'); });
+    document.getElementById('autoPublish').addEventListener('click', function(){
+      autoPublishEnabled = !autoPublishEnabled; this.classList.toggle('active', autoPublishEnabled);
+      this.textContent = autoPublishEnabled ? 'Auto‑Pub' : 'Auto‑Pub aus';
+      try { localStorage.setItem('mw-autopub', JSON.stringify(autoPublishEnabled)); } catch(e){}
+      setStatus(autoPublishEnabled ? 'Auto‑Publish an' : 'Auto‑Publish aus');
+    });
 
-    async function loadPublishedHistory(){ try { const res = await fetch('history/history.json', { cache: 'no-cache' }); if (!res.ok) throw new Error(res.status); const data = await res.json(); const features = data.features || []; const histLayer = L.layerGroup().addTo(map); const line = features.find(f => f.geometry && f.geometry.type==='LineString'); if (line){ const coords = line.geometry.coordinates.map(c => [c[1], c[0]]); L.polyline(coords, { color: '#ffffff', weight: 8, opacity: .9 }).addTo(histLayer); L.polyline(coords, { color: cssVar('--hist','#8b5cf6'), weight: 5, opacity: 1 }).addTo(histLayer); } features.filter(f => f.geometry && f.geometry.type==='Point').forEach(f => { const c = f.geometry.coordinates; const p = f.properties || {}; const when = p.t ? new Date(p.t).toLocaleString() : ''; const temp = (p.temp!=null? Math.round(p.temp)+'°C':'-'); const wind = (p.wind!=null? Math.round(p.wind)+' km/h':'-'); const desc = p.wx_desc || ''; L.circleMarker([c[1], c[0]], { radius: 5, weight: 2, color: cssVar('--hist','#8b5cf6'), fillOpacity:.7 }).bindPopup('<strong>Besuch</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc).addTo(histLayer); }); setStatus('Veröffentlichte Besuche geladen'); } catch(e){ console.log('Keine veröffentlichte History gefunden.'); } }
+    // ---- Published history viewer ----
+    async function loadPublishedHistory(){
+      try {
+        const res = await fetch('history/history.json', { cache: 'no-cache' });
+        if (!res.ok) throw new Error(res.status);
+        const data = await res.json();
+        const features = data.features || [];
+        const histLayer = L.layerGroup().addTo(map);
+        const line = features.find(f => f.geometry && f.geometry.type==='LineString');
+        if (line){
+          const coords = line.geometry.coordinates.map(c => [c[1], c[0]]);
+          L.polyline(coords, { color: '#ffffff', weight: 8, opacity: .9 }).addTo(histLayer);
+          L.polyline(coords, { color: cssVar('--hist','#8b5cf6'), weight: 5, opacity: 1 }).addTo(histLayer);
+        }
+        features.filter(f => f.geometry && f.geometry.type==='Point').forEach(f => {
+          const c = f.geometry.coordinates; const p = f.properties || {};
+          const when = p.t ? new Date(p.t).toLocaleString() : '';
+          const temp = (p.temp!=null? Math.round(p.temp)+'°C':'-'); const wind = (p.wind!=null? Math.round(p.wind)+' km/h':'-');
+          const desc = p.wx_desc || '';
+          L.circleMarker([c[1], c[0]], { radius: 5, weight: 2, color: cssVar('--hist','#8b5cf6'), fillOpacity:.7 })
+            .bindPopup('<strong>Besuch</strong><br>'+when+'<br>'+temp+' · Wind '+wind+' · '+desc).addTo(histLayer);
+        });
+        setStatus('Veröffentlichte Besuche geladen');
+      } catch(e){ console.log('Keine veröffentlichte History gefunden.'); }
+    }
 
+    // ---- Init ----
     var latlngs = points.map(function(p){ return [p.lat, p.lon]; });
     var routeBounds = null; var routeCoords = null;
     function fitRoute(){ var b = routeBounds || L.latLngBounds(latlngs); map.fitBounds(b, { padding: [24,24] }); setStatus('Route zentriert.', 'ok'); }
 
-    (function start(){ loadSnaps(); drawSnaps(); loadPublishedHistory(); fitRoute(); locateMe(false); setTimeout(tryAutoSnapshot, 3000); })();
+    (async function start(){
+      loadSnaps(); drawSnaps();
+      loadPublishedHistory();
+      fitRoute();
+      // Kein auto-locate ohne Erlaubnis: wir fragen nur, wenn bereits granted
+      try {
+        if (navigator.permissions && navigator.permissions.query) {
+          const st = await navigator.permissions.query({name:'geolocation'});
+          if (st.state === 'granted') locateMe(false);
+          else setStatus('Tippe „Ortung“, um zu zentrieren');
+        } else {
+          setStatus('Tippe „Ortung“, um zu zentrieren');
+        }
+      } catch(e){ setStatus('Tippe „Ortung“, um zu zentrieren'); }
+      // Auto-Snapshot nur bei granted; sonst Hinweis
+      setTimeout(tryAutoSnapshot, 3000);
+    })();
   </script>
 </body>
 </html>
